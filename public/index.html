@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AM Verifier – by rofers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-icon">✦</div>
+    <span class="brand-name">AM Verifier</span>
+  </div>
+  <span class="brand-by">by rofers</span>
+</header>
+
+<div class="page">
+
+  <!-- ══ AUTH SCREEN ══ -->
+  <div id="auth-screen">
+    <div class="hero">
+      <div class="hero-badge"><span class="hero-badge-dot"></span>Premium Access</div>
+      <h1>AM Verifier</h1>
+      <p>Login atau daftar untuk menggunakan AM Verifier.</p>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuth('login')">Masuk</button>
+        <button class="auth-tab"        onclick="switchAuth('register')">Daftar</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <div id="form-login">
+        <div class="field">
+          <label class="field-label">EMAIL</label>
+          <div class="input-wrap"><span class="input-icon">✉️</span>
+            <input type="email" id="l-email" placeholder="email@kamu.com" autocomplete="email"
+              onkeydown="if(event.key==='Enter')doLogin()">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">PASSWORD</label>
+          <div class="input-wrap"><span class="input-icon">🔒</span>
+            <input type="password" id="l-pass" placeholder="Password kamu" autocomplete="current-password"
+              onkeydown="if(event.key==='Enter')doLogin()">
+          </div>
+        </div>
+        <button class="btn btn-primary" id="l-btn" onclick="doLogin()">
+          <div class="spin" id="l-sp"></div><span class="btn-text">Masuk →</span>
+        </button>
+        <div class="toast" id="l-toast"><span class="toast-icon"></span><span class="toast-msg"></span></div>
+      </div>
+
+      <!-- REGISTER FORM -->
+      <div id="form-register" style="display:none">
+        <div class="field">
+          <label class="field-label">EMAIL</label>
+          <div class="input-wrap"><span class="input-icon">✉️</span>
+            <input type="email" id="r-email" placeholder="email@kamu.com" autocomplete="email">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">PASSWORD (min. 6 karakter)</label>
+          <div class="input-wrap"><span class="input-icon">🔒</span>
+            <input type="password" id="r-pass" placeholder="Buat password" autocomplete="new-password">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">KONFIRMASI PASSWORD</label>
+          <div class="input-wrap"><span class="input-icon">🔒</span>
+            <input type="password" id="r-pass2" placeholder="Ulangi password"
+              onkeydown="if(event.key==='Enter')doRegister()">
+          </div>
+        </div>
+        <button class="btn btn-primary" id="r-btn" onclick="doRegister()">
+          <div class="spin" id="r-sp"></div><span class="btn-text">Daftar →</span>
+        </button>
+        <div class="toast" id="r-toast"><span class="toast-icon"></span><span class="toast-msg"></span></div>
+      </div>
+    </div>
+
+    <div class="cara-list" style="margin-top:20px">
+      <div class="cara-item"><div class="cara-num">1</div>
+        <div class="cara-content"><h3>Daftar Akun</h3><p>Buat akun dengan email dan password, lalu verifikasi email kamu.</p></div>
+      </div>
+      <div class="cara-item"><div class="cara-num">2</div>
+        <div class="cara-content"><h3>Dapatkan Kode</h3><p>Hubungi admin via WhatsApp atau TikTok untuk membeli kode aktivasi.</p></div>
+      </div>
+      <div class="cara-item"><div class="cara-num">3</div>
+        <div class="cara-content"><h3>Aktivasi & Pakai</h3><p>Masukkan kode aktivasi, premium aktif 30 hari.</p></div>
+      </div>
+    </div>
+
+    <div class="section-title"><span class="section-title-icon">💬</span> Kontak &amp; Sosial</div>
+    <div class="contact-list">
+      <a class="contact-item" href="https://tiktok.com/@rofers.id" target="_blank" rel="noopener">
+        <div class="contact-icon tiktok">🎵</div>
+        <div class="contact-info"><h4>TikTok</h4><p>@rofers.id</p></div>
+      </a>
+      <a class="contact-item" href="https://wa.me/channel" target="_blank" rel="noopener">
+        <div class="contact-icon whatsapp">💬</div>
+        <div class="contact-info"><h4>WhatsApp</h4><p>Saluran rofers</p></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ══ APP SCREEN ══ -->
+  <div id="app-screen" style="display:none">
+
+    <div id="session-bar">
+      <div class="sinfo">👤 <b id="user-email-disp">—</b></div>
+      <button onclick="doLogout()">Keluar</button>
+    </div>
+
+    <!-- ACTIVATE CODE SECTION (shown if no premium) -->
+    <div id="activate-section">
+      <div class="card" style="margin-bottom:16px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px">
+          🔑 Aktivasi Premium
+        </div>
+        <div class="field">
+          <label class="field-label">KODE AKTIVASI</label>
+          <input type="text" id="act-code" class="no-icon"
+            placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="19"
+            style="font-family:'Space Mono',monospace;font-size:15px;font-weight:700;letter-spacing:.1em;text-align:center;text-transform:uppercase"
+            oninput="fmtCode(this)" onkeydown="if(event.key==='Enter')doActivate()">
+          <p class="hint">Masukkan kode aktivasi yang kamu beli dari admin.</p>
+        </div>
+        <button class="btn btn-primary" id="act-btn" onclick="doActivate()">
+          <div class="spin" id="act-sp"></div><span class="btn-text">✦ Aktifkan Premium</span>
+        </button>
+        <div class="toast" id="act-toast"><span class="toast-icon"></span><span class="toast-msg"></span></div>
+      </div>
+    </div>
+
+    <!-- PREMIUM ACTIVE SECTION -->
+    <div id="premium-section" style="display:none">
+      <div class="premium-banner">
+        <div class="premium-icon">⭐</div>
+        <div class="premium-info">
+          <h3>Premium Aktif</h3>
+          <p>Berlaku hingga <b id="prem-until">—</b></p>
+        </div>
+      </div>
+
+      <div class="hero" style="padding:16px 0 20px">
+        <div class="hero-badge"><span class="hero-badge-dot"></span>Premium Auto Verifier Online</div>
+        <h1>Alight Motion Verify</h1>
+        <p>Kirim link verifikasi ke email, tempel magic link, aktifkan premium otomatis.</p>
+      </div>
+
+      <div class="mode-tabs">
+        <button class="mode-tab active" onclick="switchMode('own')">📧 Email Sendiri</button>
+        <button class="mode-tab"        onclick="switchMode('temp')">🚀 Temp Email Bulk</button>
+      </div>
+
+      <div class="card">
+        <!-- MODE 1: EMAIL SENDIRI -->
+        <div class="panel active" id="mode-own">
+          <div class="steps">
+            <div class="step active" id="os1"><div class="step-dot">1</div><span>Email</span></div>
+            <div class="step-line" id="osl1"></div>
+            <div class="step" id="os2"><div class="step-dot">2</div><span>Verifikasi</span></div>
+            <div class="step-line" id="osl2"></div>
+            <div class="step" id="os3"><div class="step-dot">3</div><span>Selesai</span></div>
+          </div>
+          <div class="panel active" id="op1">
+            <div class="field">
+              <label class="field-label">EMAIL ALIGHT MOTION</label>
+              <div class="input-wrap"><span class="input-icon">✉️</span>
+                <input type="email" id="o-email" placeholder="kamu@email.com" autocomplete="email">
+              </div>
+            </div>
+            <button class="btn btn-primary" id="o-btn1" onclick="ownSend()">
+              <div class="spin" id="o-sp1"></div><span class="btn-text">✦ Kirim Magic Link</span>
+            </button>
+            <p class="hint" style="text-align:center;margin-top:10px">Cek inbox / spam untuk link verifikasi dari Alight Creative.</p>
+            <div class="toast" id="o-t1"><span class="toast-icon"></span><span class="toast-msg"></span></div>
+          </div>
+          <div class="panel" id="op2">
+            <div class="field">
+              <label class="field-label">EMAIL</label>
+              <div class="input-wrap"><span class="input-icon">✉️</span>
+                <input type="email" id="o-email-ro" readonly style="opacity:.55;cursor:default">
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">MAGIC LINK DARI EMAIL</label>
+              <textarea id="o-link" class="no-icon" placeholder="Paste link verifikasi dari inbox kamu di sini..."></textarea>
+              <p class="hint">Cek inbox / spam → cari email Alight Creative → salin link → paste.</p>
+            </div>
+            <button class="btn btn-primary" id="o-btn2" onclick="ownVerify()">
+              <div class="spin" id="o-sp2"></div><span class="btn-text">Verifikasi Sekarang →</span>
+            </button>
+            <button class="btn btn-ghost" onclick="ownBack()">← Ganti Email</button>
+            <div class="toast" id="o-t2"><span class="toast-icon"></span><span class="toast-msg"></span></div>
+          </div>
+          <div class="panel" id="op3">
+            <div class="toast success show" style="margin-top:0">
+              <span class="toast-icon">✅</span><span>Aktivasi berhasil! Premium sudah aktif.</span>
+            </div>
+            <div class="result-box show" id="o-result"></div>
+            <button class="btn btn-ghost" style="margin-top:14px" onclick="ownReset()">← Aktivasi Akun Lain</button>
+          </div>
+        </div>
+
+        <!-- MODE 2: TEMP EMAIL BULK -->
+        <div class="panel" id="mode-temp">
+          <div class="row">
+            <div class="field">
+              <label class="field-label">JUMLAH AKUN (1–50)</label>
+              <input type="number" id="b-count" class="no-icon" value="5" min="1" max="50">
+            </div>
+            <div class="field">
+              <label class="field-label">DOMAIN</label>
+              <select id="b-domain"><option value="">Loading...</option></select>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">DELAY ANTAR AKUN</label>
+            <select id="b-delay" style="padding-left:13px">
+              <option value="5000">5 detik</option>
+              <option value="8000" selected>8 detik</option>
+              <option value="12000">12 detik</option>
+              <option value="20000">20 detik</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="b-btn-start" onclick="bulkStart()">
+            <div class="spin" id="b-sp"></div><span class="btn-text">🚀 Mulai Bulk Aktivasi</span>
+          </button>
+          <button class="btn btn-ghost" id="b-btn-stop" style="display:none" onclick="bulkStop()">⏹ Stop</button>
+          <div id="b-prog" style="display:none;margin-top:16px">
+            <div class="progress-bar-wrap"><div class="progress-bar" id="b-bar"></div></div>
+            <div class="bulk-stat"><span id="b-stat-l">0 / 0</span><span id="b-stat-r">✅ 0 · ❌ 0</span></div>
+            <div class="bulk-log" id="b-log"></div>
+          </div>
+          <div class="bulk-actions" id="b-export" style="display:none">
+            <button class="btn btn-success btn-sm" onclick="bulkExport()">⬇ Export CSV</button>
+            <button class="btn btn-ghost btn-sm"   onclick="bulkReset()">↺ Reset</button>
+          </div>
+          <div class="toast" id="b-t" style="margin-top:10px"><span class="toast-icon"></span><span class="toast-msg"></span></div>
+        </div>
+      </div><!-- /card -->
+
+      <div class="section-title"><span class="section-title-icon">❓</span> FAQ</div>
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Email apa yang bisa dipakai?<span class="faq-chevron">▾</span></button>
+          <div class="faq-a"><div class="faq-a-inner">Semua email yang terdaftar di akun Alight Motion — Gmail, Outlook, Yahoo, dll.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Magic link tidak ada di email?<span class="faq-chevron">▾</span></button>
+          <div class="faq-a"><div class="faq-a-inner">Cek folder spam. Tunggu 1–2 menit lalu kirim ulang.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Berapa lama masa aktif premium?<span class="faq-chevron">▾</span></button>
+          <div class="faq-a"><div class="faq-a-inner">30 hari sejak kode diaktifkan. Kode hanya bisa dipakai satu kali.</div></div>
+        </div>
+      </div>
+    </div><!-- /premium-section -->
+
+    <div class="section-title"><span class="section-title-icon">💬</span> Kontak &amp; Sosial</div>
+    <div class="contact-list">
+      <a class="contact-item" href="https://tiktok.com/@rofers.id" target="_blank" rel="noopener">
+        <div class="contact-icon tiktok">🎵</div>
+        <div class="contact-info"><h4>TikTok</h4><p>@rofers.id</p></div>
+      </a>
+      <a class="contact-item" href="https://wa.me/channel" target="_blank" rel="noopener">
+        <div class="contact-icon whatsapp">💬</div>
+        <div class="contact-info"><h4>WhatsApp</h4><p>Saluran rofers</p></div>
+      </a>
+    </div>
+
+  </div><!-- /app-screen -->
+</div><!-- /page -->
+
+<script src="app.js"></script>
+</body>
+</html>

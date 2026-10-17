@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verifikasi Email — AM Verifier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ac:#7c3aed;--ac2:#a855f7;--ok:#16a34a;--er:#dc2626;--bg:#f0edf8;--s:#fff;--bd:#e4ddf7;--tx:#1a1033;--mu:#6b5f8a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:linear-gradient(160deg,#e8e0f5,#f0ebfd) fixed;color:var(--tx);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:var(--s);border:1px solid var(--bd);border-radius:16px;padding:36px 28px;width:100%;max-width:400px;text-align:center;box-shadow:0 8px 32px rgba(100,60,200,.12)}
+.icon{font-size:52px;margin-bottom:16px}
+h1{font-size:22px;font-weight:800;margin-bottom:8px}
+p{font-size:13.5px;color:var(--mu);line-height:1.6;margin-bottom:20px}
+.spinner{width:40px;height:40px;border:3px solid rgba(124,58,237,.2);border-top-color:var(--ac);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn{display:inline-block;padding:12px 28px;background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;border-radius:9px;text-decoration:none;font-weight:700;font-size:14px;box-shadow:0 3px 12px rgba(124,58,237,.3);margin-top:4px}
+.ok{color:var(--ok)}.er{color:var(--er)}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="spinner" id="spinner"></div>
+  <h1 id="title">Memverifikasi Email...</h1>
+  <p id="msg">Tunggu sebentar.</p>
+</div>
+<script>
+(async () => {
+  const token = new URLSearchParams(location.search).get('token');
+  const title = document.getElementById('title');
+  const msg   = document.getElementById('msg');
+  const spin  = document.getElementById('spinner');
+
+  if (!token) {
+    spin.style.display='none';
+    title.textContent='Token Tidak Valid';
+    msg.textContent='Link verifikasi tidak valid atau sudah kadaluarsa.';
+    return;
+  }
+
+  try {
+    const r = await fetch('/api/auth/verify', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ token })
+    });
+    const d = await r.json().catch(()=>({}));
+    spin.style.display='none';
+
+    if (r.ok) {
+      title.innerHTML='<span class="ok">✅ Email Terverifikasi!</span>';
+      msg.textContent = d.message || 'Email kamu berhasil diverifikasi. Silakan login.';
+      document.getElementById('card').insertAdjacentHTML('beforeend',
+        '<a href="/" class="btn">Masuk Sekarang →</a>');
+    } else {
+      title.innerHTML='<span class="er">❌ Verifikasi Gagal</span>';
+      msg.textContent = d.error || 'Token tidak valid atau sudah kadaluarsa.';
+      document.getElementById('card').insertAdjacentHTML('beforeend',
+        '<a href="/" class="btn">Kembali ke Beranda</a>');
+    }
+  } catch(_) {
+    spin.style.display='none';
+    title.innerHTML='<span class="er">Koneksi Gagal</span>';
+    msg.textContent='Tidak bisa terhubung ke server. Coba lagi.';
+  }
+})();
+</script>
+</body>
+</html>
