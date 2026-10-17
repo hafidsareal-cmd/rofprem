@@ -36,7 +36,7 @@ window.gateFormat = input => {
   input.value = o;
 };
 
-window.gateNext = () => {
+window.gateNext = async () => {
   const code  = document.getElementById('gate-code').value.trim();
   const email = document.getElementById('gate-email').value.trim();
   if (code.replace(/-/g,'').length < 16)
