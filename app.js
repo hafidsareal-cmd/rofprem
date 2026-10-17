@@ -350,3 +350,34 @@ window.toggleFaq = btn => {
   document.querySelectorAll('.faq-item.open').forEach(el=>el.classList.remove('open'));
   if(!isOpen) item.classList.add('open');
 };
+
+/* ── RofPrem Viu catalog ── */
+window.getViuPremium = async () => {
+  const session = getSession();
+  if (!session?.email) return toast('viu-toast','error','🔒','Aktifkan akses RofPrem terlebih dahulu.');
+  const btn = document.getElementById('viu-btn');
+  const spin = document.getElementById('viu-spin');
+  btn.disabled = true; spin.style.display = 'inline-block'; clearToast('viu-toast');
+  document.getElementById('viu-result').classList.remove('show');
+  try {
+    const response = await fetch('/api/premium/viu', {
+      method: 'POST', headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify({ email: session.email })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'Layanan Viu belum tersedia.');
+    const account = data.account || {};
+    const box = document.getElementById('viu-result');
+    box.innerHTML = '<div class="result-label">DETAIL AKUN VIU PREMIUM</div>';
+    for (const [label, value] of [['Email',account.email],['Password',account.password]]) {
+      const row = document.createElement('div'); row.className='result-row';
+      const key = document.createElement('span'); key.className='result-key'; key.textContent=label;
+      const val = document.createElement('span'); val.className='result-val'; val.textContent=value || '—';
+      row.append(key,val); box.appendChild(row);
+    }
+    box.classList.add('show');
+    toast('viu-toast','success','✅','Akun berhasil disiapkan.');
+  } catch (error) {
+    toast('viu-toast','error','⚠️',error.message || 'Gagal menghubungi layanan Viu.');
+  } finally { btn.disabled = false; spin.style.display = 'none'; }
+};
