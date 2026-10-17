@@ -208,35 +208,71 @@ tbody td{padding:8px 9px;border-bottom:1px solid rgba(228,221,247,.5);vertical-a
     </div>
 
     <!-- GENERATE -->
-    <div class="sec">
-      <div class="sh"><div class="st">🔑 Generate Kode Aktivasi</div></div>
-      <div class="row">
-        <div class="field">
-          <label>JUMLAH KODE (1–500)</label>
-          <input type="number" id="gc" value="10" min="1" max="500"
-            onkeydown="if(event.key==='Enter')doGen()">
-        </div>
-        <div class="field">
-          <label>CATATAN (opsional)</label>
-          <input type="text" id="gn" placeholder="mis: batch WhatsApp Oktober">
-        </div>
-        <div style="display:flex;align-items:flex-end;padding-bottom:12px">
-          <button class="btn bp" id="gb" onclick="doGen()">
-            <div class="spin" id="gsp"></div>
-            <span class="btn-text">⚡ Generate</span>
-          </button>
-        </div>
-      </div>
-      <div class="banner" id="bb">
-        <span style="font-size:20px">✅</span>
-        <div class="bi2"><b id="bc">0</b> kode berhasil dibuat · batch <code id="bid" style="font-family:monospace;font-size:11px"></code></div>
-        <button class="btn bs" id="db" onclick="doDownload()">
-          <div class="spin" id="dsp"></div>
-          <span class="btn-text">⬇ Download ZIP</span>
-        </button>
-      </div>
-      <div class="toast" id="gt"><span></span><span></span></div>
+   
+<!-- GENERATE -->
+<div class="sec">
+  <div class="sh">
+    <div class="st">🔑 Generate Kode Aktivasi</div>
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label>JUMLAH KODE (1–500)</label>
+      <input
+        type="number"
+        id="gc"
+        value="10"
+        min="1"
+        max="500"
+        onkeydown="if(event.key==='Enter')doGen()"
+      >
     </div>
+
+    <div class="field">
+      <label>MASA BERLAKU</label>
+      <select id="gd">
+        <option value="1">1 Hari</option>
+        <option value="7">7 Hari</option>
+        <option value="30" selected>30 Hari</option>
+        <option value="90">90 Hari</option>
+        <option value="180">180 Hari</option>
+        <option value="365">365 Hari</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>CATATAN (opsional)</label>
+      <input
+        type="text"
+        id="gn"
+        placeholder="Misalnya: batch WhatsApp Oktober"
+      >
+    </div>
+
+    <div style="display:flex;align-items:flex-end;padding-bottom:12px">
+      <button class="btn bp" id="gb" onclick="doGen()">
+        <div class="spin" id="gsp"></div>
+        <span class="btn-text">⚡ Generate</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="banner" id="bb">
+    <span style="font-size:20px">✅</span>
+    <div class="bi2">
+      <b id="bc">0</b> kode berhasil dibuat · batch
+      <code id="bid" style="font-family:monospace;font-size:11px"></code>
+    </div>
+    <button class="btn bs" id="db" onclick="doDownload()">
+      <div class="spin" id="dsp"></div>
+      <span class="btn-text">⬇ Download ZIP</span>
+    </button>
+  </div>
+
+  <div class="toast" id="gt">
+    <span></span><span></span>
+  </div>
+</div>
 
     <!-- TABS: CODES | AUDIT -->
     <div class="sec">
