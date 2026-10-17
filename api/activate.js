@@ -27,7 +27,11 @@ async function handler(req, res) {
   if (!normalized) return res.status(400).json({ error: 'Format kode tidak valid (harus 16 karakter)' });
 
   // Auto-expire stale codes first
-  await supabase.rpc('expire_codes').catch(() => {});
+  const { error: expireError } = await supabase.rpc('expire_codes');
+
+if (expireError) {
+  console.error('Gagal menjalankan expire_codes:', expireError);
+}
 
   const now       = new Date();
   const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
