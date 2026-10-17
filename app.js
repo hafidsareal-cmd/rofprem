@@ -2,7 +2,7 @@
  * app.js — AM Verifier frontend logic
  * Gate + Email Sendiri + Temp Email Bulk (Guerrilla Mail)
  */
-import { activateCode, getSession, clearSession } from './codes.js';
+import { getSession, clearSession } from './codes.js';
 
 'use strict';
 
@@ -47,11 +47,22 @@ window.gateNext = () => {
   setLoad('gate-btn','gate-sp',true);
   clearToast('gate-toast');
 
-  const result = activateCode(code, email);
-  setLoad('gate-btn','gate-sp',false);
-
-  if (!result.ok) return gToast('error','❌', result.error);
-  showApp({ email: email.toLowerCase(), expires_at: result.expires_at });
+  try {
+    const response = await fetch('/api/activate-public', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, email })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || 'Aktivasi gagal.');
+    const session = { email: email.trim().toLowerCase(), expires_at: result.expires_at };
+    sessionStorage.setItem('am_session', JSON.stringify(session));
+    showApp(session);
+  } catch (error) {
+    gToast('error', '❌', error.message || 'Tidak dapat menghubungi server aktivasi.');
+  } finally {
+    setLoad('gate-btn','gate-sp',false);
+  }
 };
 
 window.doLogout = () => {
