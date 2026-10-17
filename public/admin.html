@@ -480,10 +480,11 @@ async function doDownload() {
     );
 
     if (!resp.ok) {
-      const e = await resp.json().catch(() => ({}));
-      throw new Error(e.error || 'Download gagal');
+      const errorText = await resp.text();
+      throw new Error(errorText || 'Download gagal');
     }
 
+    // Respons berupa file TXT, bukan JSON
     const blob = await resp.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
