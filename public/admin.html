@@ -463,24 +463,77 @@ async function doGen() {
   }
 }
 
-/* ── DOWNLOAD ZIP ── */
+/* ── DOWNLOAD TXT ── */
 async function doDownload() {
   if (!lastBatch) return;
-  setLoad('db','dsp',true);
-  try {
-    const resp = await fetch(`${API}/admin/download?batch_id=${lastBatch}`, {
-      headers: { Authorization: `Bearer ${TOKEN}` }
-    });
-    if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e.error||'Download gagal'); }
-    const blob = await resp.blob();
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href=url; a.download=`kode-aktivasi-${lastBatch.slice(0,8)}.zip`; a.click();
-    URL.revokeObjectURL(url);
-  } catch(e) { showT('gt','error',e.message);
-  } finally { setLoad('db','dsp',false); }
-}
 
+  setLoad('db', 'dsp', true);
+
+  try {
+    const resp = await fetch(
+      `${API}/admin/download?batch_id=${lastBatch}`,
+      {
+        headers: {
+          Authorization: `Bearer ${TOKEN}`
+        }
+      }
+    );
+
+    if (!resp.ok) {
+      const e = await resp.json().catch(() => ({}));
+      throw new Error(e.error || 'Download gagal');
+    }
+
+    // Ambil hasil dari server
+    const data = await resp.json();
+
+    // Mendukung respons berupa array kode atau objek { codes: [...] }
+    const codes = Array.isArray(data) ? data : data.codes;
+
+    if (!Array.isArray(codes) || codes.length === 0) {
+      throw new Error('Kode aktivasi tidak ditemukan');
+    }
+
+    const password = 'https://rofprem.vercel.app';
+
+    const content = codes.map(item => {
+      const code = typeof item === 'string'
+        ? item
+        : item.code;
+
+      if (!code) {
+        throw new Error('Format kode dari server tidak valid');
+      }
+
+      return `email : ${code}\npassword : ${password}`;
+    }).join('\n');
+
+    const blob = new Blob(
+      [content],
+      { type: 'text/plain;charset=utf-8' }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+
+    a.href = url;
+    a.download = `kode-aktivasi-${lastBatch.slice(0, 8)}.txt`;
+
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+
+    showT('gt', 'success', `${codes.length} kode berhasil diunduh sebagai TXT`);
+
+  } catch (e) {
+    showT('gt', 'error', e.message);
+  } finally {
+    setLoad('db', 'dsp', false);
+  }
+}
+  
 /* ── CODES TABLE ── */
 async function loadCodes() {
   const qs = new URLSearchParams({
