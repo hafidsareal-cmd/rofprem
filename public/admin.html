@@ -414,23 +414,53 @@ async function loadStats() {
 /* ── GENERATE ── */
 async function doGen() {
   const count = parseInt(document.getElementById('gc').value, 10);
-  const note  = document.getElementById('gn').value.trim() || null;
-  if (!Number.isFinite(count)||count<1||count>500)
-    return showT('gt','error','Jumlah harus 1–500');
+  const duration_days = parseInt(
+    document.getElementById('gd').value,
+    10
+  );
+  const note = document.getElementById('gn').value.trim() || null;
 
-  setLoad('gb','gsp',true); hideT('gt');
+  if (!Number.isFinite(count) || count < 1 || count > 500) {
+    return showT('gt', 'error', 'Jumlah harus 1–500');
+  }
+
+  if (!Number.isFinite(duration_days) || duration_days < 1) {
+    return showT('gt', 'error', 'Masa berlaku tidak valid');
+  }
+
+  setLoad('gb', 'gsp', true);
+  hideT('gt');
   document.getElementById('bb').classList.remove('show');
 
   try {
-    const r = await api('/admin/generate','POST',{ count, note });
-    lastBatch = r.batch_id; lastCount = r.count;
-    document.getElementById('bc').textContent  = r.count;
-    document.getElementById('bid').textContent = r.batch_id.slice(0,8)+'…';
+    const r = await api('/admin/generate', 'POST', {
+      count,
+      duration_days,
+      note
+    });
+
+    lastBatch = r.batch_id;
+    lastCount = r.count;
+
+    document.getElementById('bc').textContent = r.count;
+    document.getElementById('bid').textContent =
+      r.batch_id.slice(0, 8) + '…';
+
     document.getElementById('bb').classList.add('show');
-    showT('gt','success',`${r.count} kode berhasil dibuat`);
-    loadStats(); loadCodes();
-  } catch(e) { showT('gt','error',e.message);
-  } finally { setLoad('gb','gsp',false); }
+
+    showT(
+      'gt',
+      'success',
+      `${r.count} kode berhasil dibuat dengan masa berlaku ${duration_days} hari`
+    );
+
+    loadStats();
+    loadCodes();
+  } catch (e) {
+    showT('gt', 'error', e.message);
+  } finally {
+    setLoad('gb', 'gsp', false);
+  }
 }
 
 /* ── DOWNLOAD ZIP ── */
