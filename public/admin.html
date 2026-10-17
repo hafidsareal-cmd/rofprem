@@ -471,7 +471,7 @@ async function doDownload() {
 
   try {
     const resp = await fetch(
-      `${API}/admin/download?batch_id=${lastBatch}`,
+      `${API}/admin/download?batch_id=${encodeURIComponent(lastBatch)}`,
       {
         headers: {
           Authorization: `Bearer ${TOKEN}`
@@ -484,35 +484,7 @@ async function doDownload() {
       throw new Error(e.error || 'Download gagal');
     }
 
-    // Ambil hasil dari server
-    const data = await resp.json();
-
-    // Mendukung respons berupa array kode atau objek { codes: [...] }
-    const codes = Array.isArray(data) ? data : data.codes;
-
-    if (!Array.isArray(codes) || codes.length === 0) {
-      throw new Error('Kode aktivasi tidak ditemukan');
-    }
-
-    const password = 'https://rofprem.vercel.app';
-
-    const content = codes.map(item => {
-      const code = typeof item === 'string'
-        ? item
-        : item.code;
-
-      if (!code) {
-        throw new Error('Format kode dari server tidak valid');
-      }
-
-      return `email : ${code}\npassword : ${password}`;
-    }).join('\n');
-
-    const blob = new Blob(
-      [content],
-      { type: 'text/plain;charset=utf-8' }
-    );
-
+    const blob = await resp.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
 
@@ -523,17 +495,16 @@ async function doDownload() {
     a.click();
     a.remove();
 
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
 
-    showT('gt', 'success', `${codes.length} kode berhasil diunduh sebagai TXT`);
-
+    showT('gt', 'success', 'File TXT berhasil diunduh');
   } catch (e) {
     showT('gt', 'error', e.message);
   } finally {
     setLoad('db', 'dsp', false);
   }
 }
-  
+
 /* ── CODES TABLE ── */
 async function loadCodes() {
   const qs = new URLSearchParams({
