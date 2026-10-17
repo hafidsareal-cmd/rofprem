@@ -4,7 +4,11 @@ import { requireAdmin } from '../../lib/auth.js';
 async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-  await supabase.rpc('expire_codes').catch(() => {});
+  const { error: expireError } = await supabase.rpc('expire_codes');
+
+if (expireError) {
+  console.error('Gagal menjalankan expire_codes:', expireError);
+}
 
   const { status, search, page = '1', limit = '50', batch_id } = req.query;
   const pg   = Math.max(1, parseInt(page, 10));
