@@ -57,6 +57,7 @@ window.switchAuth = mode => {
     t.classList.toggle('active', ['login','register'][i] === mode));
   document.getElementById('form-login').style.display    = mode === 'login'    ? 'block' : 'none';
   document.getElementById('form-register').style.display = mode === 'register' ? 'block' : 'none';
+  document.getElementById('form-verify-code').style.display = 'none';
 };
 
 /* ─────────────────────────────────────────
@@ -97,13 +98,41 @@ window.doRegister = async () => {
   setLoad('r-btn','r-sp',true); clearToast('r-toast');
   try {
     const r = await post('/api/auth/register', { email, password: pass });
-    toast('r-toast','success','✅', r.message || 'Cek email untuk verifikasi.');
+    toast('r-toast','success','✅', r.message || 'Kode verifikasi dikirim ke email.');
+    document.getElementById('v-email').value = email;
+    document.getElementById('v-code').value = '';
+    document.getElementById('form-login').style.display = 'none';
+    document.getElementById('form-register').style.display = 'none';
+    document.getElementById('form-verify-code').style.display = 'block';
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
     document.getElementById('r-email').value = '';
     document.getElementById('r-pass').value  = '';
     document.getElementById('r-pass2').value = '';
   } catch(e) {
     toast('r-toast','error','❌', e.message);
   } finally { setLoad('r-btn','r-sp',false); }
+};
+
+/* ─────────────────────────────────────────
+   AUTH — VERIFY EMAIL WITH 6-DIGIT CODE
+───────────────────────────────────────── */
+window.doVerifyCode = async () => {
+  const email = document.getElementById('v-email').value.trim();
+  const code = document.getElementById('v-code').value.trim();
+  if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email))
+    return toast('v-toast','error','⚠️','Masukkan email yang valid');
+  if (!/^\\d{6}$/.test(code))
+    return toast('v-toast','error','⚠️','Kode harus terdiri dari 6 angka');
+
+  setLoad('v-btn','v-sp',true); clearToast('v-toast');
+  try {
+    const r = await post('/api/auth/verify', { email, code });
+    toast('v-toast','success','✅',r.message || 'Email berhasil diverifikasi. Silakan masuk.');
+    document.getElementById('v-code').value = '';
+    setTimeout(() => switchAuth('login'), 1200);
+  } catch(e) {
+    toast('v-toast','error','❌',e.message);
+  } finally { setLoad('v-btn','v-sp',false); }
 };
 
 /* ─────────────────────────────────────────
