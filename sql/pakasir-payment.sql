@@ -15,6 +15,12 @@ CREATE TABLE IF NOT EXISTS public.payment_orders (
   completed_at TIMESTAMPTZ
 );
 
+ALTER TABLE public.payment_orders
+  DROP CONSTRAINT IF EXISTS payment_orders_amount_check;
+
+ALTER TABLE public.payment_orders
+  ADD CONSTRAINT payment_orders_amount_check CHECK (amount > 0) NOT VALID;
+
 CREATE INDEX IF NOT EXISTS idx_payment_orders_user
   ON public.payment_orders(user_id, created_at DESC);
 
