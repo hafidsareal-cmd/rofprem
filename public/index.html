@@ -81,6 +81,30 @@
         </button>
         <div class="toast" id="r-toast"><span class="toast-icon"></span><span class="toast-msg"></span></div>
       </div>
+
+      <!-- EMAIL VERIFICATION CODE -->
+      <div id="form-verify-code" style="display:none">
+        <p style="text-align:center;margin:4px 0 18px;color:var(--mu)">Masukkan kode 6 digit yang dikirim ke email kamu.</p>
+        <div class="field">
+          <label class="field-label">EMAIL</label>
+          <div class="input-wrap"><span class="input-icon">✉️</span>
+            <input type="email" id="v-email" placeholder="email@kamu.com" autocomplete="email">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">KODE VERIFIKASI</label>
+          <div class="input-wrap"><span class="input-icon">🔐</span>
+            <input type="text" id="v-code" placeholder="123456" inputmode="numeric" maxlength="6" autocomplete="one-time-code"
+              oninput="this.value=this.value.replace(/\\D/g,'').slice(0,6)" onkeydown="if(event.key==='Enter')doVerifyCode()">
+          </div>
+          <p class="hint">Kode berlaku 30 menit. Cek inbox atau folder spam.</p>
+        </div>
+        <button class="btn btn-primary" id="v-btn" onclick="doVerifyCode()">
+          <div class="spin" id="v-sp"></div><span class="btn-text">Verifikasi Email →</span>
+        </button>
+        <button class="btn btn-ghost" onclick="switchAuth('register')">← Kembali ke Daftar</button>
+        <div class="toast" id="v-toast"><span class="toast-icon"></span><span class="toast-msg"></span></div>
+      </div>
     </div>
 
     <div class="cara-list" style="margin-top:20px">
