@@ -2,7 +2,7 @@
  * app.js — AM Verifier frontend logic
  * Gate + Email Sendiri + Temp Email Bulk (Guerrilla Mail)
  */
-import { getSession, clearSession } from './codes.js';
+import { activateCode, getSession, clearSession } from './codes.js';
 
 'use strict';
 
@@ -36,7 +36,7 @@ window.gateFormat = input => {
   input.value = o;
 };
 
-window.gateNext = async () => {
+window.gateNext = () => {
   const code  = document.getElementById('gate-code').value.trim();
   const email = document.getElementById('gate-email').value.trim();
   if (code.replace(/-/g,'').length < 16)
@@ -47,22 +47,11 @@ window.gateNext = async () => {
   setLoad('gate-btn','gate-sp',true);
   clearToast('gate-toast');
 
-  try {
-    const response = await fetch('/api/activate-public', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, email })
-    });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.error || 'Aktivasi gagal.');
-    const session = { email: email.trim().toLowerCase(), expires_at: result.expires_at };
-    sessionStorage.setItem('am_session', JSON.stringify(session));
-    showApp(session);
-  } catch (error) {
-    gToast('error', '❌', error.message || 'Tidak dapat menghubungi server aktivasi.');
-  } finally {
-    setLoad('gate-btn','gate-sp',false);
-  }
+  const result = activateCode(code, email);
+  setLoad('gate-btn','gate-sp',false);
+
+  if (!result.ok) return gToast('error','❌', result.error);
+  showApp({ email: email.toLowerCase(), expires_at: result.expires_at });
 };
 
 window.doLogout = () => {
@@ -360,35 +349,4 @@ window.toggleFaq = btn => {
   const item=btn.closest('.faq-item'), isOpen=item.classList.contains('open');
   document.querySelectorAll('.faq-item.open').forEach(el=>el.classList.remove('open'));
   if(!isOpen) item.classList.add('open');
-};
-
-/* ── RofPrem Viu catalog ── */
-window.getViuPremium = async () => {
-  const session = getSession();
-  if (!session?.email) return toast('viu-toast','error','🔒','Aktifkan akses RofPrem terlebih dahulu.');
-  const btn = document.getElementById('viu-btn');
-  const spin = document.getElementById('viu-spin');
-  btn.disabled = true; spin.style.display = 'inline-block'; clearToast('viu-toast');
-  document.getElementById('viu-result').classList.remove('show');
-  try {
-    const response = await fetch('/api/premium/viu', {
-      method: 'POST', headers: { 'Content-Type':'application/json' },
-      body: JSON.stringify({ email: session.email })
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.error || 'Layanan Viu belum tersedia.');
-    const account = data.account || {};
-    const box = document.getElementById('viu-result');
-    box.innerHTML = '<div class="result-label">DETAIL AKUN VIU PREMIUM</div>';
-    for (const [label, value] of [['Email',account.email],['Password',account.password]]) {
-      const row = document.createElement('div'); row.className='result-row';
-      const key = document.createElement('span'); key.className='result-key'; key.textContent=label;
-      const val = document.createElement('span'); val.className='result-val'; val.textContent=value || '—';
-      row.append(key,val); box.appendChild(row);
-    }
-    box.classList.add('show');
-    toast('viu-toast','success','✅','Akun berhasil disiapkan.');
-  } catch (error) {
-    toast('viu-toast','error','⚠️',error.message || 'Gagal menghubungi layanan Viu.');
-  } finally { btn.disabled = false; spin.style.display = 'none'; }
 };
