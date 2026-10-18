@@ -45,6 +45,7 @@ label{display:block;font-size:10.5px;font-weight:700;color:var(--mu);letter-spac
         <div style="display:flex;align-items:flex-end;padding-bottom:12px"><button class="btn bp" id="gb" onclick="doGen()"><div class="spin" id="gsp"></div><span class="btn-text">⚡ Generate</span></button></div>
       </div>
       <div class="banner" id="bb"><span style="font-size:20px">✅</span><div class="bi2"><b id="bc">0</b> kode berhasil dibuat · batch <code id="bid" style="font-family:monospace;font-size:11px"></code></div><button class="btn bs" id="db" onclick="doDownload()"><div class="spin" id="dsp"></div><span class="btn-text">⬇ Download TXT</span></button></div>
+      <div id="generated-result" style="display:none;margin-top:12px"><label>KODE AKTIVASI YANG BARU DIBUAT</label><textarea id="generatedCodes" rows="6" readonly style="font-family:'Space Mono',monospace;font-size:12px;line-height:1.8;resize:vertical;background:#fff"></textarea><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn bg" onclick="copyGeneratedCodes()">📋 Salin Semua Kode</button><span style="font-size:11px;color:var(--mu);align-self:center">Simpan kode ini sekarang; kode hanya ditampilkan pada hasil generate ini.</span></div></div>
       <div class="toast" id="gt"><span></span><span></span></div>
     </div>
     <div class="sec">
@@ -92,8 +93,14 @@ async function doGen(){
  if(!Number.isFinite(count)||count<1||count>500)return showT('gt','error','Jumlah harus 1–500');
  if(!Number.isFinite(duration_days)||duration_days<1)return showT('gt','error','Masa berlaku tidak valid');
  setLoad('gb','gsp',true);hideT('gt');document.getElementById('bb').classList.remove('show');
- try{const r=await api('/admin/generate','POST',{count,duration_days,note});lastBatch=r.batch_id;lastCount=r.count;document.getElementById('bc').textContent=r.count;document.getElementById('bid').textContent=String(r.batch_id||'').slice(0,8)+'…';document.getElementById('bb').classList.add('show');showT('gt','success',`${r.count} kode berhasil dibuat dengan masa berlaku ${duration_days} hari`);loadStats();loadCodes();}
+ try{const r=await api('/admin/generate','POST',{count,duration_days,note});lastBatch=r.batch_id;lastCount=r.count;document.getElementById('bc').textContent=r.count;document.getElementById('bid').textContent=String(r.batch_id||'').slice(0,8)+'…';document.getElementById('generatedCodes').value=Array.isArray(r.codes)?r.codes.join('\\n'):'';document.getElementById('generated-result').style.display=Array.isArray(r.codes)&&r.codes.length?'block':'none';document.getElementById('bb').classList.add('show');curF='all';curS='';curPg=1;document.getElementById('si').value='';document.querySelectorAll('.fb').forEach(b=>b.classList.toggle('active',b.textContent.includes('Semua')));showT('gt','success',`${r.count} kode berhasil dibuat dengan masa berlaku ${duration_days} hari`);loadStats();loadCodes();}
  catch(e){showT('gt','error',e.message);}finally{setLoad('gb','gsp',false);}
+}
+async function copyGeneratedCodes(){
+ const value=document.getElementById('generatedCodes').value;
+ if(!value)return showT('gt','error','Tidak ada kode untuk disalin');
+ try{await navigator.clipboard.writeText(value);showT('gt','success','Semua kode berhasil disalin');}
+ catch(_){const el=document.getElementById('generatedCodes');el.focus();el.select();try{const ok=document.execCommand('copy');showT('gt',ok?'success':'error',ok?'Semua kode berhasil disalin':'Gagal menyalin. Pilih teks lalu salin manual.');}catch(e){showT('gt','error','Gagal menyalin. Pilih teks lalu salin manual.');}}
 }
 async function doDownload(){
  if(!lastBatch)return;setLoad('db','dsp',true);
