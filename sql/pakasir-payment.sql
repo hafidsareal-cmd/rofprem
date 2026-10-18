@@ -59,7 +59,7 @@ BEGIN
 
   INSERT INTO public.activation_codes (code, status, note)
   SELECT code_value, 'available', 'Pakasir order ' || ord.order_id
-  FROM unnest(p_codes) AS code_value;
+  FROM unnest(p_codes) AS item(code_value);
 
   UPDATE public.payment_orders
   SET status = 'completed',
