@@ -1,4 +1,4 @@
-// Node.js 18+ | Vercel Serverless | KitaPay — Create Payment
+// Node.js 18+ | Vercel Serverless | Pakasir — Create Transaction
 // POST /api/payment/create
 // Body: { email: string }
 
@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Email tidak valid' });
   }
 
-  // Cek apakah email ini punya kode aktif
+  // Cek kode aktif yang belum expired
   const { data: existing } = await supabase
     .from('activation_codes')
     .select('code, expires_at')
@@ -37,49 +37,53 @@ export default async function handler(req, res) {
     });
   }
 
-  const externalId = `AM-${uuidv4()}`;
+  // order_id = identifier unik per transaksi
+  const orderId = `AM-${uuidv4()}`;
 
   try {
-    const kitaRes = await fetch('https://apikita.rinzgroup.web.id/v1/payments', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.KITAPAY_SECRET_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        merchantId: process.env.KITAPAY_MERCHANT_ID,
-        amount: 15000,
-        externalId,
-        targetWebhookUrl: `${process.env.SITE_URL}/api/payment/webhook`,
-      }),
-    });
+    const pakasirRes = await fetch(
+      `https://app.pakasir.com/api/v2/create-transaction/${process.env.PAKASIR_SLUG}/${orderId}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Api-Key': process.env.PAKASIR_API_KEY,
+        },
+        body: JSON.stringify({
+          method: 'qris',
+          amount: 15000,
+        }),
+      }
+    );
 
-    const kitaData = await kitaRes.json();
+    const data = await pakasirRes.json();
 
-    if (!kitaData.success) {
-      console.error('[create] KitaPay error:', kitaData);
+    if (!pakasirRes.ok || !data.txn_id) {
+      console.error('[create] Pakasir error:', data);
       return res.status(502).json({ error: 'Gagal membuat transaksi pembayaran' });
     }
 
-    // Simpan pending order ke Supabase agar webhook tahu email-nya
+    // Simpan mapping order_id → email di pending_orders
     const { error: dbErr } = await supabase.from('pending_orders').insert({
-      external_id: externalId,
+      order_id: orderId,
+      txn_id: data.txn_id,
       email: email.toLowerCase(),
-      transaction_id: kitaData.transaction.id,
-      amount: kitaData.transaction.amount,
+      amount: 15000,
       created_at: new Date().toISOString(),
     });
 
     if (dbErr) {
-      console.error('[create] Supabase insert error:', dbErr);
+      console.error('[create] Supabase error:', dbErr);
       return res.status(500).json({ error: 'Database error' });
     }
 
     return res.status(200).json({
-      transactionId: kitaData.transaction.id,
-      externalId,
-      amount: kitaData.transaction.amount,
-      expiresAt: kitaData.transaction.expires_at,
+      txnId: data.txn_id,
+      orderId,
+      // payment_link buat redirect ke halaman bayar Pakasir
+      paymentUrl: `https://app.pakasir.com/pay-v2/${data.txn_id}?redirect=${encodeURIComponent(process.env.SITE_URL + '/bayar-sukses')}`,
+      qrString: data.qr_string ?? null,
+      expiredAt: data.expired_at,
     });
   } catch (err) {
     console.error('[create] Unexpected error:', err);

@@ -1,6 +1,15 @@
-// Node.js 18+ | Vercel Serverless | KitaPay — Webhook Handler
+// Node.js 18+ | Vercel Serverless | Pakasir — Webhook Handler
 // POST /api/payment/webhook
-// Dipanggil otomatis oleh KitaPay saat pembayaran sukses
+//
+// Pakasir webhook payload:
+// {
+//   "amount": 15000,
+//   "order_id": "AM-uuid",
+//   "project": "slug-kamu",
+//   "status": "completed",
+//   "payment_method": "qris",
+//   "completed_at": "2026-10-18T08:07:02.819+07:00"
+// }
 
 import { createClient } from '@supabase/supabase-js';
 import { generateCode } from '../../lib/codes.js';
@@ -16,17 +25,15 @@ export default async function handler(req, res) {
     return res.status(405).end();
   }
 
-  const { event, data } = req.body ?? {};
+  const { order_id, amount, status } = req.body ?? {};
 
-  // Selalu return 200 ke KitaPay agar tidak retry terus
-  if (event !== 'payment.success') {
+  // Pakasir mengirim status "completed" saat sukses
+  if (status !== 'completed') {
     return res.status(200).json({ received: true });
   }
 
-  const { external_id, amount, status, transaction_id } = data;
-
-  if (status !== 'PAID' || amount < 15000) {
-    console.warn('[webhook] Transaksi tidak valid:', data);
+  if (!order_id || amount < 15000) {
+    console.warn('[webhook] Payload tidak valid:', req.body);
     return res.status(200).json({ received: true });
   }
 
@@ -34,40 +41,40 @@ export default async function handler(req, res) {
     // Ambil email dari pending_orders
     const { data: order, error: orderErr } = await supabase
       .from('pending_orders')
-      .select('email')
-      .eq('external_id', external_id)
+      .select('email, txn_id')
+      .eq('order_id', order_id)
       .maybeSingle();
 
     if (orderErr || !order) {
-      console.error('[webhook] Order tidak ditemukan:', external_id, orderErr);
+      console.error('[webhook] Order tidak ditemukan:', order_id, orderErr);
       return res.status(200).json({ received: true });
     }
 
-    const { email } = order;
+    const { email, txn_id } = order;
 
-    // Cek idempotency — jangan generate dua kali untuk transaksi yang sama
+    // Idempotency — jangan proses dua kali
     const { data: existing } = await supabase
       .from('activation_codes')
       .select('code')
-      .eq('transaction_id', transaction_id)
+      .eq('txn_id', txn_id)
       .maybeSingle();
 
     if (existing) {
-      console.log('[webhook] Sudah diproses sebelumnya:', transaction_id);
+      console.log('[webhook] Sudah diproses:', txn_id);
       return res.status(200).json({ received: true });
     }
 
-    // Generate kode unik
+    // Generate kode aktivasi
     const code = generateCode();
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30);
 
-    // Simpan kode ke activation_codes
+    // Simpan ke activation_codes
     const { error: insertErr } = await supabase.from('activation_codes').insert({
       code,
       email,
-      transaction_id,
-      external_id,
+      txn_id,
+      order_id,
       amount,
       expires_at: expiresAt.toISOString(),
       used_at: null,
@@ -80,13 +87,14 @@ export default async function handler(req, res) {
     }
 
     // Hapus dari pending_orders
-    await supabase.from('pending_orders').delete().eq('external_id', external_id);
+    await supabase.from('pending_orders').delete().eq('order_id', order_id);
 
-    // Kirim email kode aktivasi
+    // Kirim email
     await sendActivationEmail(email, code, expiresAt);
 
-    console.log(`[webhook] ✅ Kode ${code} dikirim ke ${email}`);
+    console.log(`[webhook] ✅ Kode ${code} → ${email}`);
     return res.status(200).json({ received: true });
+
   } catch (err) {
     console.error('[webhook] Unexpected error:', err);
     return res.status(200).json({ received: true });

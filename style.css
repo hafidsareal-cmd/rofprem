@@ -1,224 +1,71 @@
 /* AM Premium — Stylesheet */
-/* Light purple gradient, card putih, sesuai referensi teamrofers.lovable.app */
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --purple:     #6c63ff;
-  --purple-lt:  #a78bfa;
-  --purple-bg:  #f5f3ff;
-  --purple-bd:  #c4b5fd;
-  --text:       #111827;
-  --muted:      #6b7280;
-  --white:      #ffffff;
-  --radius:     14px;
+  --purple:    #6c63ff;
+  --purple-lt: #a78bfa;
+  --purple-bg: #f5f3ff;
+  --purple-bd: #c4b5fd;
+  --text:      #111827;
+  --muted:     #6b7280;
+  --white:     #ffffff;
+  --radius:    14px;
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: var(--purple-bg);
-  color: var(--text);
-  line-height: 1.6;
-}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--purple-bg); color: var(--text); line-height: 1.6; }
 
-/* ─── Containers ─── */
 .container        { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
 .container.narrow { max-width: 560px; }
 
-/* ─── Hero ─── */
-.hero {
-  background: linear-gradient(135deg, #6c63ff 0%, #a78bfa 100%);
-  padding: 80px 20px 64px;
-  text-align: center;
-  color: #fff;
-}
-
+/* Hero */
+.hero { background: linear-gradient(135deg, #6c63ff 0%, #a78bfa 100%); padding: 80px 20px 64px; text-align: center; color: #fff; }
 .hero-inner { max-width: 600px; margin: 0 auto; }
+.badge { display: inline-block; background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.35); border-radius: 999px; padding: 5px 16px; font-size: 13px; font-weight: 600; margin-bottom: 20px; }
+.hero h1 { font-size: clamp(32px, 6vw, 52px); font-weight: 800; line-height: 1.15; letter-spacing: -1px; margin-bottom: 16px; }
+.hero h1 .grad { color: #e9d5ff; }
+.hero .sub { font-size: 16px; color: rgba(255,255,255,.85); margin-bottom: 32px; }
+.btn-cta { display: inline-block; background: #fff; color: var(--purple); font-weight: 700; font-size: 15px; padding: 14px 32px; border-radius: 999px; text-decoration: none; box-shadow: 0 4px 20px rgba(0,0,0,.15); transition: transform .15s, box-shadow .15s; }
+.btn-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(0,0,0,.2); }
 
-.badge {
-  display: inline-block;
-  background: rgba(255,255,255,0.2);
-  border: 1px solid rgba(255,255,255,0.35);
-  border-radius: 999px;
-  padding: 5px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  margin-bottom: 20px;
-}
-
-.hero h1 {
-  font-size: clamp(32px, 6vw, 52px);
-  font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: -1px;
-  margin-bottom: 16px;
-}
-
-.hero h1 .grad {
-  color: #e9d5ff;
-}
-
-.hero .sub {
-  font-size: 16px;
-  color: rgba(255,255,255,0.85);
-  margin-bottom: 32px;
-}
-
-.btn-cta {
-  display: inline-block;
-  background: #fff;
-  color: var(--purple);
-  font-weight: 700;
-  font-size: 15px;
-  padding: 14px 32px;
-  border-radius: 999px;
-  text-decoration: none;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-.btn-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(0,0,0,0.2); }
-
-/* ─── Features ─── */
-.features {
-  padding: 64px 20px;
-}
-
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-}
-
-.feat-card {
-  background: var(--white);
-  border-radius: var(--radius);
-  padding: 28px 24px;
-  box-shadow: 0 2px 12px rgba(108,99,255,0.08);
-  text-align: center;
-}
-
+/* Features */
+.features { padding: 64px 20px; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+.feat-card { background: var(--white); border-radius: var(--radius); padding: 28px 24px; box-shadow: 0 2px 12px rgba(108,99,255,.08); text-align: center; }
 .feat-icon { font-size: 32px; margin-bottom: 12px; }
-.feat-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+.feat-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
 .feat-card p  { font-size: 14px; color: var(--muted); }
 
-/* ─── Checkout ─── */
+/* Checkout */
 .checkout-section { padding: 0 20px 80px; }
+.checkout-card { background: var(--white); border-radius: 20px; padding: 36px 32px; box-shadow: 0 4px 28px rgba(108,99,255,.13); margin-bottom: 24px; }
+.checkout-header { text-align: center; margin-bottom: 28px; }
+.checkout-header h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.price-tag { font-size: 32px; font-weight: 800; color: var(--purple); }
+.price-tag span { font-size: 16px; font-weight: 500; color: var(--muted); }
 
-.checkout-card {
-  background: var(--white);
-  border-radius: 20px;
-  padding: 36px 32px;
-  box-shadow: 0 4px 28px rgba(108,99,255,0.13);
-  margin-bottom: 24px;
-}
-
-.checkout-header {
-  text-align: center;
-  margin-bottom: 28px;
-}
-
-.checkout-header h2 {
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.price-tag {
-  font-size: 32px;
-  font-weight: 800;
-  color: var(--purple);
-}
-.price-tag span {
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--muted);
-}
-
-/* Form */
-label {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 8px;
-}
-
-input[type="email"] {
-  width: 100%;
-  padding: 13px 16px;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 10px;
-  font-size: 15px;
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.15s;
-  background: #fafafa;
-}
+label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+input[type="email"] { width: 100%; padding: 13px 16px; border: 1.5px solid #e5e7eb; border-radius: 10px; font-size: 15px; outline: none; transition: border-color .15s; background: #fafafa; }
 input[type="email"]:focus { border-color: var(--purple); background: #fff; }
+.form-error { min-height: 20px; font-size: 13px; color: #dc2626; margin: 6px 0 0; }
 
-.form-error {
-  min-height: 20px;
-  font-size: 13px;
-  color: #dc2626;
-  margin: 6px 0 0;
-}
+button#pay-btn { width: 100%; margin-top: 16px; padding: 15px; background: linear-gradient(135deg, #6c63ff, #8b5cf6); color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity .15s, transform .15s; }
+button#pay-btn:hover:not(:disabled) { opacity: .93; transform: translateY(-1px); }
+button#pay-btn:disabled { opacity: .6; cursor: not-allowed; }
+.form-note { text-align: center; font-size: 12px; color: var(--muted); margin-top: 14px; }
 
-button#pay-btn {
-  width: 100%;
-  margin-top: 16px;
-  padding: 15px;
-  background: linear-gradient(135deg, #6c63ff 0%, #8b5cf6 100%);
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: opacity 0.15s, transform 0.15s;
-}
-button#pay-btn:hover:not(:disabled) { opacity: 0.93; transform: translateY(-1px); }
-button#pay-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-.form-note {
-  text-align: center;
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 14px;
-}
-
-/* Success */
-.success-box {
-  text-align: center;
-  padding: 8px 0;
-}
+.success-box { text-align: center; padding: 8px 0; }
 .success-icon { font-size: 48px; margin-bottom: 16px; }
 .success-box h3 { font-size: 20px; font-weight: 700; margin-bottom: 10px; color: #16a34a; }
-.success-box p  { font-size: 15px; color: var(--muted); }
-.success-note   { font-size: 13px; color: #9ca3af; margin-top: 12px !important; }
+.success-box p { font-size: 15px; color: var(--muted); }
+.success-note { font-size: 13px; color: #9ca3af; margin-top: 12px !important; }
 
-/* How To */
-.how-to {
-  background: var(--white);
-  border-radius: var(--radius);
-  padding: 24px 28px;
-  box-shadow: 0 2px 12px rgba(108,99,255,0.07);
-}
-.how-to h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; color: var(--text); }
+.how-to { background: var(--white); border-radius: var(--radius); padding: 24px 28px; box-shadow: 0 2px 12px rgba(108,99,255,.07); }
+.how-to h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
 .how-to ol { padding-left: 20px; }
 .how-to li { font-size: 14px; color: var(--muted); margin-bottom: 8px; line-height: 1.5; }
 
-/* ─── Footer ─── */
-footer {
-  text-align: center;
-  padding: 24px 20px;
-  font-size: 12px;
-  color: #9ca3af;
-  border-top: 1px solid #f0f0f0;
-  background: #fff;
-}
+footer { text-align: center; padding: 24px 20px; font-size: 12px; color: #9ca3af; border-top: 1px solid #f0f0f0; background: #fff; }
 
-/* ─── Responsive ─── */
 @media (max-width: 480px) {
   .checkout-card { padding: 28px 20px; }
   .hero { padding: 60px 20px 48px; }

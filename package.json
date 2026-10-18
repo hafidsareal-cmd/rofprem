@@ -1,7 +1,6 @@
 {
   "name": "rofprem",
   "version": "1.0.0",
-  "description": "AM Premium — Alight Motion Activator with KitaPay payment",
   "type": "module",
   "scripts": {
     "start": "node app.js",

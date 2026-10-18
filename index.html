@@ -8,7 +8,6 @@
 </head>
 <body>
 
-  <!-- ─── HERO ─── -->
   <header class="hero">
     <div class="hero-inner">
       <div class="badge">✨ Premium Activator</div>
@@ -18,19 +17,18 @@
     </div>
   </header>
 
-  <!-- ─── FITUR ─── -->
   <section class="features">
     <div class="container">
       <div class="card-grid">
         <div class="feat-card">
           <div class="feat-icon">⚡</div>
           <h3>Instan</h3>
-          <p>Kode dikirim otomatis ke email kamu segera setelah pembayaran.</p>
+          <p>Kode dikirim otomatis ke email segera setelah pembayaran sukses.</p>
         </div>
         <div class="feat-card">
           <div class="feat-icon">🔒</div>
           <h3>Aman</h3>
-          <p>Pembayaran via QRIS. Tidak ada data kartu atau rekening yang disimpan.</p>
+          <p>Bayar via QRIS. Tidak ada data rekening yang disimpan.</p>
         </div>
         <div class="feat-card">
           <div class="feat-icon">📅</div>
@@ -41,7 +39,6 @@
     </div>
   </section>
 
-  <!-- ─── CHECKOUT ─── -->
   <section class="checkout-section" id="beli">
     <div class="container narrow">
       <div class="checkout-card">
@@ -52,20 +49,13 @@
 
         <div id="checkout-form">
           <label for="buyer-email">Email kamu</label>
-          <input
-            type="email"
-            id="buyer-email"
-            placeholder="nama@email.com"
-            autocomplete="email"
-          />
+          <input type="email" id="buyer-email" placeholder="nama@email.com" autocomplete="email" />
           <p id="checkout-error" class="form-error" aria-live="polite"></p>
           <button id="pay-btn" onclick="startPayment()">
             <span id="pay-text">Bayar via QRIS — Rp 15.000</span>
             <span id="pay-loading" style="display:none;">Memproses...</span>
           </button>
-          <p class="form-note">
-            Kode aktivasi dikirim ke email di atas setelah pembayaran sukses.
-          </p>
+          <p class="form-note">Kode aktivasi dikirim ke email di atas setelah pembayaran sukses.</p>
         </div>
 
         <div id="checkout-success" style="display:none;">
@@ -78,7 +68,6 @@
         </div>
       </div>
 
-      <!-- Cara pakai -->
       <div class="how-to">
         <h3>Cara Pakai</h3>
         <ol>
@@ -91,22 +80,18 @@
     </div>
   </section>
 
-  <!-- ─── FOOTER ─── -->
   <footer>
     <p>© 2026 AM Premium. Tidak berafiliasi dengan Alight Creative Inc.</p>
   </footer>
 
   <script>
-    const SNAP_ORIGIN = 'https://app.kitapay.rinzgroup.web.id';
-
     async function startPayment() {
-      const email    = document.getElementById('buyer-email').value.trim();
-      const errorEl  = document.getElementById('checkout-error');
-      const payBtn   = document.getElementById('pay-btn');
-      const payText  = document.getElementById('pay-text');
-      const payLoad  = document.getElementById('pay-loading');
+      const email   = document.getElementById('buyer-email').value.trim();
+      const errorEl = document.getElementById('checkout-error');
+      const payBtn  = document.getElementById('pay-btn');
+      const payText = document.getElementById('pay-text');
+      const payLoad = document.getElementById('pay-loading');
 
-      // Reset
       errorEl.textContent = '';
 
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -114,8 +99,7 @@
         return;
       }
 
-      // Loading state
-      payBtn.disabled = true;
+      payBtn.disabled       = true;
       payText.style.display = 'none';
       payLoad.style.display = 'inline';
 
@@ -128,7 +112,6 @@
 
         const data = await res.json();
 
-        // Reset tombol
         payBtn.disabled       = false;
         payText.style.display = 'inline';
         payLoad.style.display = 'none';
@@ -138,58 +121,28 @@
           return;
         }
 
-        // Buka Snap
-        const snapUrl = `${SNAP_ORIGIN}/snap/${data.transactionId}`;
-        const popup   = window.open(snapUrl, 'KitaPaySnap', 'width=420,height=680,scrollbars=no');
-
-        if (!popup) {
-          errorEl.textContent = 'Popup diblokir browser. Izinkan popup untuk situs ini, lalu coba lagi.';
-          return;
-        }
-
-        // Listen hasil
-        function onMessage(event) {
-          if (event.origin !== SNAP_ORIGIN) return;
-          try {
-            const msg = JSON.parse(event.data);
-            if (msg.type === 'KITAPAY_SNAP_SUCCESS') {
-              window.removeEventListener('message', onMessage);
-              if (popup && !popup.closed) popup.close();
-              showSuccess(email);
-            }
-          } catch (_) {}
-        }
-
-        window.addEventListener('message', onMessage);
-
-        // Guard: kalau popup ditutup manual tanpa bayar
-        const pollClose = setInterval(() => {
-          if (popup.closed) {
-            clearInterval(pollClose);
-            window.removeEventListener('message', onMessage);
-            // Jangan tampilin error — mungkin dia sudah bayar, webhook akan tetap jalan
-          }
-        }, 1000);
+        // Redirect ke halaman bayar Pakasir
+        // Setelah bayar, Pakasir redirect balik ke /bayar-sukses
+        window.location.href = data.paymentUrl;
 
       } catch (err) {
         payBtn.disabled       = false;
         payText.style.display = 'inline';
         payLoad.style.display = 'none';
         errorEl.textContent   = 'Koneksi error. Coba lagi beberapa saat.';
-        console.error('[startPayment]', err);
       }
     }
 
-    function showSuccess(email) {
-      document.getElementById('checkout-form').style.display    = 'none';
-      document.getElementById('checkout-success').style.display = 'block';
-      document.getElementById('success-email').textContent      = email;
-    }
-
-    // Enter key trigger
-    document.getElementById('buyer-email')?.addEventListener('keydown', (e) => {
+    document.getElementById('buyer-email')?.addEventListener('keydown', e => {
       if (e.key === 'Enter') startPayment();
     });
+
+    // Halaman sukses redirect dari Pakasir
+    if (window.location.pathname === '/bayar-sukses') {
+      document.getElementById('checkout-form').style.display    = 'none';
+      document.getElementById('checkout-success').style.display = 'block';
+      document.getElementById('beli').scrollIntoView({ behavior: 'smooth' });
+    }
   </script>
 </body>
 </html>
