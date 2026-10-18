@@ -164,6 +164,7 @@ function showApp(sess) {
   } else {
     document.getElementById('activate-section').style.display = 'block';
     document.getElementById('premium-section').style.display  = 'none';
+    restorePendingPayment();
   }
 }
 
@@ -196,6 +197,136 @@ window.doActivate = async () => {
   } catch(e) {
     toast('act-toast','error','❌', e.message);
   } finally { setLoad('act-btn','act-sp',false); }
+};
+
+/* ─────────────────────────────────────────
+   BUY ACTIVATION CODES — PAKASIR QRIS
+───────────────────────────────────────── */
+const BUY_CODE_PRICE = 20000;
+const PENDING_ORDER_KEY = 'rofprem_pending_order';
+
+window.updateBuyTotal = () => {
+  const input = document.getElementById('buy-count');
+  if (!input) return;
+  let quantity = Number(input.value);
+  if (!Number.isInteger(quantity)) quantity = 1;
+  quantity = Math.min(10, Math.max(1, quantity));
+  document.getElementById('buy-total').textContent =
+    'Total: ' + (quantity * BUY_CODE_PRICE).toLocaleString('id-ID', {style:'currency',currency:'IDR',maximumFractionDigits:0});
+};
+
+function renderPendingPayment(order) {
+  if (!order || !order.orderId || !order.paymentUrl) return;
+  const panel = document.getElementById('payment-pending');
+  panel.style.display = 'block';
+  document.getElementById('payment-result').style.display = 'none';
+  document.getElementById('payment-link').href = order.paymentUrl;
+  document.getElementById('payment-order-info').textContent =
+    'Pesanan ' + order.orderId + ' • ' + order.quantity + ' kode • ' +
+    Number(order.amount).toLocaleString('id-ID', {style:'currency',currency:'IDR',maximumFractionDigits:0});
+}
+
+function restorePendingPayment() {
+  try {
+    const order = JSON.parse(localStorage.getItem(PENDING_ORDER_KEY) || 'null');
+    if (order) renderPendingPayment(order);
+  } catch (_) {}
+  updateBuyTotal();
+}
+
+window.buyCodes = async () => {
+  const sess = getSession();
+  if (!sess?.token) return toast('buy-toast','error','⚠️','Silakan masuk terlebih dahulu.');
+  const quantity = Number(document.getElementById('buy-count').value);
+  if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
+    return toast('buy-toast','error','⚠️','Jumlah kode harus 1 sampai 10.');
+  }
+  const existing = localStorage.getItem(PENDING_ORDER_KEY);
+  if (existing) {
+    try {
+      const order = JSON.parse(existing);
+      if (order?.orderId) {
+        renderPendingPayment(order);
+        return toast('buy-toast','info','ℹ️','Selesaikan atau cek pembayaran sebelumnya terlebih dahulu.');
+      }
+    } catch (_) { localStorage.removeItem(PENDING_ORDER_KEY); }
+  }
+
+  setLoad('buy-btn','buy-sp',true);
+  clearToast('buy-toast');
+  try {
+    const result = await authPost('/api/payment/create', { quantity }, sess.token);
+    const order = {
+      orderId: result.orderId,
+      txnId: result.txnId,
+      quantity: result.quantity,
+      amount: result.amount,
+      paymentUrl: result.paymentUrl,
+      createdAt: Date.now(),
+    };
+    localStorage.setItem(PENDING_ORDER_KEY, JSON.stringify(order));
+    renderPendingPayment(order);
+    toast('buy-toast','success','✅','Tagihan berhasil dibuat. Selesaikan pembayaran melalui halaman Pakasir.');
+  } catch (error) {
+    toast('buy-toast','error','❌',error.message);
+  } finally {
+    setLoad('buy-btn','buy-sp',false);
+  }
+};
+
+window.checkPaymentStatus = async () => {
+  const sess = getSession();
+  let order;
+  try { order = JSON.parse(localStorage.getItem(PENDING_ORDER_KEY) || 'null'); } catch (_) {}
+  if (!sess?.token || !order?.orderId) {
+    return toast('payment-status-toast','error','⚠️','Pesanan pembayaran tidak ditemukan. Buat pesanan baru.');
+  }
+
+  const button = document.getElementById('check-payment-btn');
+  button.disabled = true;
+  clearToast('payment-status-toast');
+  try {
+    const result = await authPost('/api/payment/status', { orderId: order.orderId }, sess.token);
+    if (result.status === 'completed') {
+      document.getElementById('payment-pending').style.display = 'none';
+      const holder = document.getElementById('payment-codes');
+      holder.replaceChildren();
+      (result.codes || []).forEach(code => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--surface2)';
+        const value = document.createElement('code');
+        value.textContent = code;
+        value.style.cssText = 'font-weight:800;letter-spacing:.04em;word-break:break-word';
+        const copy = document.createElement('button');
+        copy.type = 'button';
+        copy.className = 'btn btn-ghost btn-sm';
+        copy.textContent = 'Salin';
+        copy.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(code);
+            copy.textContent = 'Tersalin ✓';
+          } catch (_) {
+            copy.textContent = 'Salin manual';
+          }
+        });
+        row.append(value, copy);
+        holder.appendChild(row);
+      });
+      document.getElementById('payment-result').style.display = 'block';
+      localStorage.removeItem(PENDING_ORDER_KEY);
+      toast('buy-toast','success','✅','Pembayaran berhasil dan kode sudah diterbitkan.');
+    } else if (result.status === 'canceled') {
+      localStorage.removeItem(PENDING_ORDER_KEY);
+      document.getElementById('payment-pending').style.display = 'none';
+      toast('payment-status-toast','error','❌','Tagihan dibatalkan atau kedaluwarsa. Buat pesanan baru jika masih ingin membeli.');
+    } else {
+      toast('payment-status-toast','info','⏳','Pembayaran belum terkonfirmasi. Tunggu sebentar lalu cek lagi.');
+    }
+  } catch (error) {
+    toast('payment-status-toast','error','❌',error.message);
+  } finally {
+    button.disabled = false;
+  }
 };
 
 /* ─────────────────────────────────────────
