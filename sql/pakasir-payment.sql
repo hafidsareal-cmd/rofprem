@@ -19,7 +19,7 @@ ALTER TABLE public.payment_orders
   DROP CONSTRAINT IF EXISTS payment_orders_amount_check;
 
 ALTER TABLE public.payment_orders
-  ADD CONSTRAINT payment_orders_amount_check CHECK (amount > 0) NOT VALID;
+  ADD CONSTRAINT payment_orders_amount_check CHECK (amount = quantity * 20000) NOT VALID;
 
 CREATE INDEX IF NOT EXISTS idx_payment_orders_user
   ON public.payment_orders(user_id, created_at DESC);
