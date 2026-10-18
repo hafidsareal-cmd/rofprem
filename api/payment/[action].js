@@ -64,6 +64,10 @@ async function createPayment(req, res) {
       quantity,
       amount,
       paymentUrl,
+      // Pakasir v2 returns the QRIS payload as qr_string.
+      qrString: payment.qr_string || null,
+      fee: Number(payment.fee || 0),
+      totalPayment: Number(payment.total_payment || amount),
       expiredAt: payment.expired_at || null,
     });
   } catch (error) {
