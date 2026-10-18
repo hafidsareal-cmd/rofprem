@@ -33,6 +33,16 @@ BEGIN
   ) THEN
     ALTER TABLE public.activation_codes ALTER COLUMN txn_id DROP NOT NULL;
   END IF;
+
+  -- Admin-generated activation codes are not tied to a payment order.
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'activation_codes'
+      AND column_name = 'order_id'
+  ) THEN
+    ALTER TABLE public.activation_codes ALTER COLUMN order_id DROP NOT NULL;
+  END IF;
 END $$;
 
 ALTER TABLE public.activation_codes
