@@ -83,6 +83,22 @@
       </div>
     </div>
 
+
+    <!-- BUY ACTIVATION CODE: Pakasir QRIS -->
+    <div class="card" id="purchase-card" style="margin-top:18px">
+      <div style="font-size:14px;font-weight:800;margin-bottom:8px">🔑 Beli Kode Aktivasi</div>
+      <p class="hint" style="margin-bottom:14px">Rp20.000 untuk 1 kode. Kode diterbitkan setelah pembayaran QRIS terverifikasi dan aktif selama 30 hari sejak pertama kali digunakan.</p>
+      <button class="btn btn-primary" id="buy-code-btn" onclick="buyActivationCode()">Buat Pembayaran QRIS — Rp20.000</button>
+      <div id="purchase-payment" style="display:none;margin-top:16px;text-align:center">
+        <p class="hint" id="purchase-order"></p>
+        <div id="purchase-qr" style="display:flex;justify-content:center;margin:12px auto"></div>
+        <p id="purchase-total" style="font-weight:800;font-size:18px"></p>
+        <p class="hint">Scan QRIS melalui aplikasi pembayaran kamu. Jangan tutup halaman sebelum kode muncul.</p>
+        <button class="btn btn-primary" id="check-payment-btn" onclick="checkActivationPayment()">Saya sudah membayar — periksa status</button>
+      </div>
+      <div id="purchase-result" class="toast" style="display:none;margin-top:12px"></div>
+    </div>
+
     <div class="cara-list" style="margin-top:20px">
       <div class="cara-item"><div class="cara-num">1</div>
         <div class="cara-content"><h3>Daftar Akun</h3><p>Buat akun dengan email dan password, lalu verifikasi email kamu.</p></div>
@@ -278,6 +294,7 @@
   </div><!-- /app-screen -->
 </div><!-- /page -->
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
 <script src="app.js"></script>
 </body>
 </html>
