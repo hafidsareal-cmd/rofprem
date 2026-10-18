@@ -218,13 +218,49 @@ window.updateBuyTotal = () => {
 function renderPendingPayment(order) {
   if (!order || !order.orderId || !order.paymentUrl) return;
   const panel = document.getElementById('payment-pending');
+  const qrPanel = document.getElementById('payment-qr-panel');
+  const qrBox = document.getElementById('payment-qr');
+  const paymentLink = document.getElementById('payment-link');
   panel.style.display = 'block';
   document.getElementById('payment-result').style.display = 'none';
-  document.getElementById('payment-link').href = order.paymentUrl;
+  paymentLink.href = order.paymentUrl;
   document.getElementById('payment-order-info').textContent =
     'Pesanan ' + order.orderId + ' • ' + order.quantity + ' kode • ' +
     Number(order.amount).toLocaleString('id-ID', {style:'currency',currency:'IDR',maximumFractionDigits:0});
+
+  qrBox.replaceChildren();
+  const qrError = document.getElementById('payment-qr-error');
+  if (order.qrString && typeof window.QRCode === 'function') {
+    qrPanel.style.display = 'block';
+    qrError.style.display = 'none';
+    paymentLink.style.display = 'none';
+    document.getElementById('payment-total-info').textContent =
+      Number(order.totalPayment || order.amount).toLocaleString('id-ID', {style:'currency',currency:'IDR',maximumFractionDigits:0});
+    document.getElementById('payment-expiry-info').textContent = order.expiredAt
+      ? 'Berlaku sampai ' + new Date(order.expiredAt).toLocaleString('id-ID')
+      : 'Selesaikan pembayaran sebelum tagihan kedaluwarsa.';
+    new window.QRCode(qrBox, {
+      text: order.qrString,
+      width: 220,
+      height: 220,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: window.QRCode.CorrectLevel.M,
+    });
+  } else {
+    qrPanel.style.display = 'none';
+    paymentLink.style.display = 'block';
+    qrError.style.display = order.qrString ? 'block' : 'none';
+  }
 }
+
+window.discardPendingPayment = () => {
+  localStorage.removeItem(PENDING_ORDER_KEY);
+  document.getElementById('payment-pending').style.display = 'none';
+  document.getElementById('payment-qr').replaceChildren();
+  clearToast('payment-status-toast');
+  toast('buy-toast','info','ℹ️','Tagihan disembunyikan dari halaman ini. Jika tagihan lama masih aktif, jangan membayarnya; buat tagihan baru.');
+};
 
 function restorePendingPayment() {
   try {
@@ -262,11 +298,16 @@ window.buyCodes = async () => {
       quantity: result.quantity,
       amount: result.amount,
       paymentUrl: result.paymentUrl,
+      qrString: result.qrString || null,
+      totalPayment: result.totalPayment || result.amount,
+      expiredAt: result.expiredAt || null,
       createdAt: Date.now(),
     };
     localStorage.setItem(PENDING_ORDER_KEY, JSON.stringify(order));
     renderPendingPayment(order);
-    toast('buy-toast','success','✅','Tagihan berhasil dibuat. Selesaikan pembayaran melalui halaman Pakasir.');
+    toast('buy-toast','success','✅',result.qrString
+      ? 'Tagihan dibuat. QRIS sekarang tampil langsung di halaman ini.'
+      : 'Tagihan dibuat, tetapi QRIS tidak tersedia dari respons Pakasir. Gunakan halaman pembayaran sebagai alternatif.');
   } catch (error) {
     toast('buy-toast','error','❌',error.message);
   } finally {
