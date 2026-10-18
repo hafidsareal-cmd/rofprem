@@ -6,418 +6,155 @@
 <title>Admin Panel — AM Verifier</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<!-- fflate for client-side ZIP -->
-<script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
 <style>
-:root{
-  --bg:#f0edf8;--surface:#fff;--s2:#f5f3fd;--border:#e4ddf7;
-  --accent:#7c3aed;--a2:#a855f7;--glow:rgba(124,58,237,.15);
-  --text:#1a1033;--muted:#6b5f8a;--dim:#c5c0e0;
-  --ok:#16a34a;--err:#dc2626;--warn:#d97706;
-  --sh:0 4px 20px rgba(100,60,200,.1);
-}
+:root{--bg:#f0edf8;--s:#fff;--s2:#f5f3fd;--bd:#e4ddf7;--ac:#7c3aed;--ac2:#a855f7;--gw:rgba(124,58,237,.15);--tx:#1a1033;--mu:#6b5f8a;--dm:#c5c0e0;--ok:#16a34a;--er:#dc2626;--wn:#d97706;--in:#0ea5e9;--sh:0 4px 20px rgba(100,60,200,.1)}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:linear-gradient(160deg,#e8e0f5,#f0ebfd) fixed;color:var(--text);min-height:100vh}
-
-/* topbar */
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;
-  background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);
-  position:sticky;top:0;z-index:100}
-.t-left{display:flex;align-items:center;gap:10px}
-.brand-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--a2));
-  display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff}
-.brand-name{font-size:14px;font-weight:700}
-.brand-tag{font-size:10px;font-weight:700;color:var(--accent);background:rgba(124,58,237,.1);
-  border:1px solid rgba(124,58,237,.2);border-radius:100px;padding:2px 8px}
-.logout-btn{font-family:inherit;font-size:12px;font-weight:600;color:var(--muted);
-  background:transparent;border:1.5px solid var(--border);border-radius:7px;padding:5px 11px;cursor:pointer}
-.logout-btn:hover{border-color:var(--err);color:var(--err)}
-
-.wrap{max-width:960px;margin:0 auto;padding:22px 16px 48px}
-
-/* section */
-.sec{background:var(--surface);border:1px solid var(--border);border-radius:14px;
-  padding:20px 18px;margin-bottom:18px;box-shadow:var(--sh)}
-.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.sec-title{font-size:14px;font-weight:800;display:flex;align-items:center;gap:7px}
-
-/* stats */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
-.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 15px;box-shadow:var(--sh)}
-.stat-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.05em;margin-bottom:3px}
-.stat-val{font-size:20px;font-weight:800}
-.c-purple{color:var(--accent)}.c-ok{color:var(--ok)}.c-warn{color:var(--warn)}.c-err{color:var(--err)}
-
-/* form */
-label{display:block;font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.05em;margin-bottom:5px}
-input[type=number],input[type=text],input[type=password],select{
-  width:100%;background:var(--s2);border:1.5px solid var(--border);border-radius:8px;
-  padding:10px 12px;font-family:inherit;font-size:13px;color:var(--text);
-  outline:none;transition:border-color .2s,box-shadow .2s}
-input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
-.field{margin-bottom:12px}
-.row{display:flex;gap:8px}.row .field{flex:1}
-
-/* buttons */
-.btn{padding:10px 16px;border:none;border-radius:8px;font-family:inherit;font-size:13px;
-  font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s;white-space:nowrap}
-.btn-primary{background:linear-gradient(135deg,var(--accent),var(--a2));color:#fff;box-shadow:0 3px 12px rgba(124,58,237,.28)}
-.btn-primary:hover:not(:disabled){opacity:.9;transform:translateY(-1px)}
-.btn-success{background:linear-gradient(135deg,#059669,#10b981);color:#fff}
-.btn-success:hover:not(:disabled){opacity:.9}
-.btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border);font-size:12px}
-.btn-ghost:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
-.btn-danger{background:transparent;color:var(--err);border:1.5px solid rgba(220,38,38,.25);font-size:11.5px;padding:5px 10px}
-.btn-danger:hover:not(:disabled){background:rgba(220,38,38,.06)}
-.btn:disabled{opacity:.38;cursor:not-allowed}
-.spin{width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
-  border-radius:50%;animation:spin .6s linear infinite;display:none}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading .spin{display:inline-block}.loading .btn-text{display:none}
-
-/* batch banner */
-.batch-banner{display:none;background:rgba(22,163,74,.07);border:1.5px solid rgba(22,163,74,.25);
-  border-radius:9px;padding:12px 15px;margin-top:12px;gap:10px;align-items:center;flex-wrap:wrap}
-.batch-banner.show{display:flex}
-.batch-info{flex:1;font-size:12.5px;color:var(--ok)}
-
-/* toast */
-.toast{padding:10px 13px;border-radius:8px;font-size:12.5px;display:none;gap:7px;
-  align-items:flex-start;border:1.5px solid transparent;margin-top:10px}
-.toast.show{display:flex}
-.toast.success{background:rgba(22,163,74,.07);border-color:rgba(22,163,74,.25);color:var(--ok)}
-.toast.error  {background:rgba(220,38,38,.07);border-color:rgba(220,38,38,.25);color:var(--err)}
-.toast.info   {background:rgba(124,58,237,.07);border-color:rgba(124,58,237,.25);color:var(--accent)}
-
-/* filters */
-.filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
-.fbtn{padding:5px 13px;border-radius:100px;border:1.5px solid var(--border);background:transparent;
-  font-family:inherit;font-size:11.5px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s}
-.fbtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.search-w{flex:1;min-width:140px;position:relative}
-.search-w input{padding-left:30px;margin:0}
-.search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:13px;pointer-events:none}
-
-/* table */
-.tbl-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:12px}
-thead th{font-size:9.5px;font-weight:700;color:var(--muted);letter-spacing:.06em;
-  padding:7px 9px;border-bottom:1.5px solid var(--border);text-align:left;white-space:nowrap}
-tbody tr:hover{background:var(--s2)}
-tbody td{padding:8px 9px;border-bottom:1px solid rgba(228,221,247,.5);vertical-align:middle}
-.code-cell{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.04em}
-.badge{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px}
-.b-available{background:rgba(22,163,74,.1);color:var(--ok)}
-.b-used     {background:rgba(124,58,237,.1);color:var(--accent)}
-.b-expired  {background:rgba(217,119,6,.1);color:var(--warn)}
-.b-revoked  {background:rgba(220,38,38,.1);color:var(--err)}
-.dt{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap}
-.empty td{text-align:center;padding:28px;color:var(--dim);font-size:12.5px}
-
-/* pagination */
-.pg{display:flex;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:8px}
-.pg-info{font-size:11.5px;color:var(--muted)}
-.pg-btns{display:flex;gap:5px}
-
-/* login */
-#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(160deg,#e8e0f5,#f0ebfd)}
-.login-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;
-  padding:30px 26px;width:100%;max-width:360px;box-shadow:0 8px 32px rgba(100,60,200,.14);text-align:center}
-.login-icon{width:52px;height:52px;border-radius:13px;background:linear-gradient(135deg,var(--accent),var(--a2));
-  display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;margin:0 auto 14px}
-.login-card h2{font-size:19px;font-weight:800;margin-bottom:3px}
-.login-card p{font-size:12.5px;color:var(--muted);margin-bottom:20px}
-.lf{text-align:left;margin-bottom:12px}
-
-@media(max-width:580px){.stats{grid-template-columns:repeat(2,1fr)}}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:linear-gradient(160deg,#e8e0f5,#f0ebfd) fixed;color:var(--tx);min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:100}
+.tl{display:flex;align-items:center;gap:10px}.bi{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--ac),var(--ac2));display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff}.bn{font-size:14px;font-weight:700}.bt{font-size:10px;font-weight:700;color:var(--ac);background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2);border-radius:100px;padding:2px 8px}.lob{font-family:inherit;font-size:12px;font-weight:600;color:var(--mu);background:transparent;border:1.5px solid var(--bd);border-radius:7px;padding:5px 11px;cursor:pointer}.lob:hover{border-color:var(--er);color:var(--er)}
+.wrap{max-width:1080px;margin:0 auto;padding:22px 16px 48px}
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:18px}.stat{background:var(--s);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;box-shadow:var(--sh)}.sl{font-size:9.5px;font-weight:700;color:var(--mu);letter-spacing:.05em;margin-bottom:3px}.sv{font-size:19px;font-weight:800}.c-p{color:var(--ac)}.c-ok{color:var(--ok)}.c-wn{color:var(--wn)}.c-er{color:var(--er)}.c-in{color:var(--in)}
+.sec{background:var(--s);border:1px solid var(--bd);border-radius:14px;padding:20px 18px;margin-bottom:18px;box-shadow:var(--sh)}.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}.st{font-size:14px;font-weight:800;display:flex;align-items:center;gap:7px}
+label{display:block;font-size:10.5px;font-weight:700;color:var(--mu);letter-spacing:.05em;margin-bottom:5px}input,select,textarea{width:100%;background:var(--s2);border:1.5px solid var(--bd);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:13px;color:var(--tx);outline:none;transition:border-color .2s,box-shadow .2s}input:focus,select:focus,textarea:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--gw)}input[type="checkbox"]{width:16px;height:16px;accent-color:var(--ac);cursor:pointer;vertical-align:middle;padding:0;margin:0}.field{margin-bottom:12px}.row{display:flex;gap:8px}.row .field{flex:1}
+.btn{padding:10px 16px;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s;white-space:nowrap}.bp{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;box-shadow:0 3px 12px rgba(124,58,237,.28)}.bp:hover:not(:disabled){opacity:.9;transform:translateY(-1px)}.bs{background:linear-gradient(135deg,#059669,#10b981);color:#fff}.bs:hover:not(:disabled){opacity:.9}.bg{background:transparent;color:var(--mu);border:1.5px solid var(--bd);font-size:12px}.bg:hover:not(:disabled){border-color:var(--ac);color:var(--ac)}.bd-btn{background:transparent;color:var(--er);border:1.5px solid rgba(220,38,38,.25);font-size:11.5px;padding:5px 10px}.bd-btn:hover:not(:disabled){background:rgba(220,38,38,.06)}.btn:disabled{opacity:.38;cursor:not-allowed}.spin{width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;display:none}@keyframes sp{to{transform:rotate(360deg)}}.loading .spin{display:inline-block}.loading .btn-text{display:none}
+.banner{display:none;background:rgba(22,163,74,.07);border:1.5px solid rgba(22,163,74,.25);border-radius:9px;padding:12px 15px;margin-top:12px;gap:10px;align-items:center;flex-wrap:wrap}.banner.show{display:flex}.bi2{flex:1;font-size:12.5px;color:var(--ok)}
+.toast{padding:10px 13px;border-radius:8px;font-size:12.5px;display:none;gap:7px;align-items:flex-start;border:1.5px solid transparent;margin-top:10px}.toast.show{display:flex}.toast.success{background:rgba(22,163,74,.07);border-color:rgba(22,163,74,.25);color:var(--ok)}.toast.error{background:rgba(220,38,38,.07);border-color:rgba(220,38,38,.25);color:var(--er)}.toast.info{background:rgba(124,58,237,.07);border-color:rgba(124,58,237,.25);color:var(--ac)}.toast.warn{background:rgba(217,119,6,.07);border-color:rgba(217,119,6,.25);color:var(--wn)}
+.flt{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px;align-items:center}.fb{padding:5px 13px;border-radius:100px;border:1.5px solid var(--bd);background:transparent;font-family:inherit;font-size:11.5px;font-weight:600;color:var(--mu);cursor:pointer;transition:all .2s}.fb.active{background:var(--ac);color:#fff;border-color:var(--ac)}.sw{flex:1;min-width:140px;position:relative}.sw input{padding-left:30px;margin:0}.si{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--dm);font-size:13px;pointer-events:none}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12px}thead th{font-size:9.5px;font-weight:700;color:var(--mu);letter-spacing:.06em;padding:7px 9px;border-bottom:1.5px solid var(--bd);text-align:left;white-space:nowrap;background:var(--s2)}tbody tr:hover{background:var(--s2)}tbody td{padding:8px 9px;border-bottom:1px solid rgba(228,221,247,.5);vertical-align:middle}.cc{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:var(--ac);letter-spacing:.04em}.badge{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px}.ba{background:rgba(22,163,74,.1);color:var(--ok)}.bu{background:rgba(124,58,237,.1);color:var(--ac)}.be{background:rgba(217,119,6,.1);color:var(--wn)}.br{background:rgba(220,38,38,.1);color:var(--er)}.dt{font-family:'Space Mono',monospace;font-size:10px;color:var(--mu);white-space:nowrap}.empty td{text-align:center;padding:28px;color:var(--dm);font-size:12.5px}
+.pg{display:flex;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:8px}.pgi{font-size:11.5px;color:var(--mu)}.pgb{display:flex;gap:5px}
+.audit-list{display:flex;flex-direction:column;gap:5px;max-height:280px;overflow-y:auto}.audit-row{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;font-size:12px}.audit-action{font-weight:700;min-width:100px;color:var(--tx)}.audit-actor{color:var(--mu);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.audit-time{font-family:'Space Mono',monospace;font-size:10px;color:var(--dm);white-space:nowrap}.audit-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;flex-shrink:0}.ab-generate{background:rgba(14,165,233,.1);color:var(--in)}.ab-activate{background:rgba(22,163,74,.1);color:var(--ok)}.ab-revoke{background:rgba(220,38,38,.1);color:var(--er)}.ab-login{background:rgba(124,58,237,.1);color:var(--ac)}.ab-export_zip{background:rgba(217,119,6,.1);color:var(--wn)}.ab-login_fail{background:rgba(220,38,38,.1);color:var(--er)}.ab-delete_codes{background:rgba(220,38,38,.1);color:var(--er)}
+#ls{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#e8e0f5,#f0ebfd)}.lc{background:var(--s);border:1px solid var(--bd);border-radius:16px;padding:30px 26px;width:100%;max-width:360px;box-shadow:0 8px 32px rgba(100,60,200,.14);text-align:center}.li{width:52px;height:52px;border-radius:13px;background:linear-gradient(135deg,var(--ac),var(--ac2));display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;margin:0 auto 14px}.lc h2{font-size:19px;font-weight:800;margin-bottom:3px}.lc p{font-size:12.5px;color:var(--mu);margin-bottom:20px}.lf{text-align:left;margin-bottom:12px}
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--bd);margin-bottom:18px}.tab{padding:8px 16px;font-family:inherit;font-size:13px;font-weight:600;color:var(--mu);background:transparent;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}.tab.active{color:var(--ac);border-bottom-color:var(--ac)}
+@media(max-width:700px){.stats{grid-template-columns:repeat(3,1fr)}.row{flex-direction:column}}@media(max-width:420px){.stats{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
-
-<!-- LOGIN -->
-<div id="login-screen">
-  <div class="login-card">
-    <div class="login-icon">✦</div>
-    <h2>Admin Panel</h2>
-    <p>AM Premium Activator</p>
-    <div class="lf">
-      <label>PASSWORD ADMIN</label>
-      <input type="password" id="login-pass" placeholder="Masukkan password"
-        onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <button class="btn btn-primary" id="login-btn" style="width:100%" onclick="doLogin()">
-      <div class="spin" id="login-sp"></div>
-      <span class="btn-text">Masuk →</span>
-    </button>
-    <div class="toast" id="login-toast" style="margin-top:10px"><span></span><span></span></div>
-  </div>
-</div>
-
-<!-- PANEL -->
-<div id="admin-panel" style="display:none">
-  <div class="topbar">
-    <div class="t-left">
-      <div class="brand-icon">✦</div>
-      <span class="brand-name">AM Verifier</span>
-      <span class="brand-tag">ADMIN</span>
-    </div>
-    <button class="logout-btn" onclick="doLogout()">Keluar</button>
-  </div>
-
+<div id="ls"><div class="lc"><div class="li">✦</div><h2>Admin Panel</h2><p>AM Premium Activator</p><div class="lf"><label>PASSWORD ADMIN</label><input type="password" id="lp" placeholder="Masukkan password" onkeydown="if(event.key==='Enter')doLogin()"></div><button class="btn bp" id="lb" style="width:100%" onclick="doLogin()"><div class="spin" id="lsp"></div><span class="btn-text">Masuk →</span></button><div class="toast" id="lt" style="margin-top:10px"><span></span><span></span></div></div></div>
+<div id="ap" style="display:none">
+  <div class="topbar"><div class="tl"><div class="bi">✦</div><span class="bn">AM Verifier</span><span class="bt">ADMIN</span></div><button class="lob" onclick="doLogout()">Keluar</button></div>
   <div class="wrap">
-
-    <!-- STATS -->
-    <div class="stats" id="stats-row">
-      <div class="stat"><div class="stat-label">TOTAL KODE</div><div class="stat-val c-purple" id="s-total">0</div></div>
-      <div class="stat"><div class="stat-label">TERSEDIA</div><div class="stat-val c-ok" id="s-avail">0</div></div>
-      <div class="stat"><div class="stat-label">TERPAKAI</div><div class="stat-val" id="s-used">0</div></div>
-      <div class="stat"><div class="stat-label">EXP/REVOKED</div><div class="stat-val c-warn" id="s-dead">0</div></div>
+    <div class="stats">
+      <div class="stat"><div class="sl">TOTAL</div><div class="sv c-p" id="st">0</div></div><div class="stat"><div class="sl">TERSEDIA</div><div class="sv c-ok" id="sa">0</div></div><div class="stat"><div class="sl">TERPAKAI</div><div class="sv" id="su">0</div></div><div class="stat"><div class="sl">EXPIRED</div><div class="sv c-wn" id="se">0</div></div><div class="stat"><div class="sl">DICABUT</div><div class="sv c-er" id="sr">0</div></div><div class="stat"><div class="sl">HARI INI</div><div class="sv c-in" id="sd">0</div></div>
     </div>
-
-    <!-- GENERATE -->
     <div class="sec">
-      <div class="sec-head">
-        <div class="sec-title">🔑 Generate Kode Aktivasi</div>
-      </div>
+      <div class="sh"><div class="st">🔑 Generate Kode Aktivasi</div></div>
       <div class="row">
-        <div class="field">
-          <label>JUMLAH KODE (1–500)</label>
-          <input type="number" id="gen-count" value="10" min="1" max="500"
-            onkeydown="if(event.key==='Enter')doGenerate()">
-        </div>
-        <div style="display:flex;align-items:flex-end;padding-bottom:12px">
-          <button class="btn btn-primary" id="gen-btn" onclick="doGenerate()">
-            <div class="spin" id="gen-sp"></div>
-            <span class="btn-text">⚡ Generate</span>
-          </button>
-        </div>
+        <div class="field"><label>JUMLAH KODE (1–500)</label><input type="number" id="gc" value="10" min="1" max="500" onkeydown="if(event.key==='Enter')doGen()"></div>
+        <div class="field"><label>MASA BERLAKU</label><select id="gd"><option value="1">1 Hari</option><option value="7">7 Hari</option><option value="30" selected>30 Hari</option><option value="90">90 Hari</option><option value="180">180 Hari</option><option value="365">365 Hari</option></select></div>
+        <div class="field"><label>CATATAN (opsional)</label><input type="text" id="gn" placeholder="Misalnya: batch WhatsApp Oktober"></div>
+        <div style="display:flex;align-items:flex-end;padding-bottom:12px"><button class="btn bp" id="gb" onclick="doGen()"><div class="spin" id="gsp"></div><span class="btn-text">⚡ Generate</span></button></div>
       </div>
-
-      <div class="batch-banner" id="batch-banner">
-        <span style="font-size:20px">✅</span>
-        <div class="batch-info">
-          <b id="batch-count">0</b> kode berhasil dibuat
-        </div>
-        <button class="btn btn-success" id="dl-btn" onclick="doDownload()">
-          <div class="spin" id="dl-sp"></div>
-          <span class="btn-text">⬇ Download ZIP</span>
-        </button>
-      </div>
-      <div class="toast" id="gen-toast"><span></span><span></span></div>
+      <div class="banner" id="bb"><span style="font-size:20px">✅</span><div class="bi2"><b id="bc">0</b> kode berhasil dibuat · batch <code id="bid" style="font-family:monospace;font-size:11px"></code></div><button class="btn bs" id="db" onclick="doDownload()"><div class="spin" id="dsp"></div><span class="btn-text">⬇ Download TXT</span></button></div>
+      <div id="generated-result" style="display:none;margin-top:12px"><label>KODE AKTIVASI YANG BARU DIBUAT</label><textarea id="generatedCodes" rows="6" readonly style="font-family:'Space Mono',monospace;font-size:12px;line-height:1.8;resize:vertical;background:#fff"></textarea><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn bg" onclick="copyGeneratedCodes()">📋 Salin Semua Kode</button><span style="font-size:11px;color:var(--mu);align-self:center">Simpan kode ini sekarang; kode hanya ditampilkan pada hasil generate ini.</span></div></div>
+      <div class="toast" id="gt"><span></span><span></span></div>
     </div>
-
-    <!-- CODE LIST -->
     <div class="sec">
-      <div class="sec-head">
-        <div class="sec-title">📋 Daftar Kode Aktivasi</div>
-        <button class="btn btn-ghost" style="padding:6px 11px;font-size:11.5px" onclick="renderTable()">↻ Refresh</button>
-      </div>
-
-      <div class="filters">
-        <button class="fbtn active" onclick="setFilter(this,'all')">Semua</button>
-        <button class="fbtn" onclick="setFilter(this,'available')">Tersedia</button>
-        <button class="fbtn" onclick="setFilter(this,'used')">Terpakai</button>
-        <button class="fbtn" onclick="setFilter(this,'expired')">Kadaluarsa</button>
-        <button class="fbtn" onclick="setFilter(this,'revoked')">Dicabut</button>
-        <div class="search-w">
-          <span class="search-icon">🔍</span>
-          <input type="text" placeholder="Cari kode atau email..." id="search-input" oninput="debSearch()">
+      <div class="tabs"><button class="tab active" onclick="switchTab('codes',this)">📋 Daftar Kode</button><button class="tab" onclick="switchTab('audit',this)">📝 Audit Log</button><button class="tab" onclick="switchTab('recent',this)">🕐 Aktivasi Terbaru</button></div>
+      <div id="tab-codes">
+        <div class="flt">
+          <button class="fb active" onclick="setF(this,'all')">Semua</button><button class="fb" onclick="setF(this,'available')">Tersedia</button><button class="fb" onclick="setF(this,'used')">Terpakai</button><button class="fb" onclick="setF(this,'expired')">Kadaluarsa</button><button class="fb" onclick="setF(this,'revoked')">Dicabut</button>
+          <div class="sw"><span class="si">🔍</span><input type="text" placeholder="Cari kode / email..." id="si" oninput="debS()"></div><button class="btn bg" style="padding:6px 11px;font-size:11.5px" onclick="loadCodes()">↻</button>
         </div>
-      </div>
-
-      <div class="tbl-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th><th>KODE</th><th>STATUS</th><th>DIBUAT</th>
-              <th>AKTIVASI</th><th>KADALUARSA</th><th>DIPAKAI OLEH</th><th>AKSI</th>
-            </tr>
-          </thead>
-          <tbody id="codes-tbody">
-            <tr class="empty"><td colspan="8">Loading...</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="pg">
-        <span class="pg-info" id="pg-info">—</span>
-        <div class="pg-btns">
-          <button class="btn btn-ghost" style="padding:6px 11px;font-size:11.5px"
-            id="prev-btn" onclick="changePage(-1)" disabled>← Prev</button>
-          <button class="btn btn-ghost" style="padding:6px 11px;font-size:11.5px"
-            id="next-btn" onclick="changePage(1)"  disabled>Next →</button>
+        <div class="flt" style="margin-top:-3px">
+          <button class="btn bg" style="padding:6px 11px;font-size:11.5px" id="selectAllBtn" onclick="toggleSelectPage()">☑ Pilih Semua Tersedia di Halaman</button>
+          <button class="btn bd-btn" id="deleteSelectedBtn" onclick="deleteSelected()" disabled>🗑 Hapus Terpilih (<span id="selectedCount">0</span>)</button>
+          <span style="font-size:11px;color:var(--mu)">Hanya kode berstatus Tersedia yang dapat dihapus.</span>
         </div>
+        <div class="tw"><table><thead><tr><th><input type="checkbox" id="selectPage" aria-label="Pilih semua tersedia di halaman" onchange="togglePageCheckboxes(this.checked)"></th><th>#</th><th>KODE</th><th>STATUS</th><th>CATATAN</th><th>DIBUAT</th><th>AKTIVASI</th><th>KADALUARSA</th><th>DIPAKAI OLEH</th><th>AKSI</th></tr></thead><tbody id="ctb"><tr class="empty"><td colspan="10">Loading...</td></tr></tbody></table></div>
+        <div class="pg"><span class="pgi" id="pgi">—</span><div class="pgb"><button class="btn bg" style="padding:6px 11px;font-size:11.5px" id="pb" onclick="chPg(-1)" disabled>← Prev</button><button class="btn bg" style="padding:6px 11px;font-size:11.5px" id="nb" onclick="chPg(1)" disabled>Next →</button></div></div>
       </div>
+      <div id="tab-audit" style="display:none"><div class="audit-list" id="audit-list"><div style="text-align:center;padding:20px;color:var(--dm);font-size:12.5px">Loading...</div></div></div>
+      <div id="tab-recent" style="display:none"><div class="tw"><table><thead><tr><th>KODE</th><th>DIPAKAI OLEH</th><th>AKTIVASI</th><th>KADALUARSA</th></tr></thead><tbody id="rtb"><tr class="empty"><td colspan="4">Loading...</td></tr></tbody></table></div></div>
     </div>
-
   </div>
 </div>
+<script>
+'use strict';
+const API='/api';
+let TOKEN=sessionStorage.getItem('am_adm')||'';
+let curF='all',curS='',curPg=1,lastBatch='',lastCount=0,sTimer=null;
+const selectedCodes=new Set();
+if(TOKEN)showPanel();
 
-<script type="module">
-import { generateCodes, listCodes, revokeCode, getStats, getCodesByBatch, buildAndDownloadZip } from './codes.js';
-
-/* ── CONFIG ── */
-const ADMIN_PASS = 'hafidsacoder1';
-const PER_PAGE   = 50;
-
-/* ── STATE ── */
-let curFilter  = 'all';
-let curSearch  = '';
-let curPage    = 1;
-let lastBatch  = [];
-let searchTimer= null;
-
-/* ── INIT ── */
-if (sessionStorage.getItem('am_admin') === '1') showPanel();
-
-window.doLogin = () => {
-  const pass = document.getElementById('login-pass').value;
-  if (pass === ADMIN_PASS) {
-    sessionStorage.setItem('am_admin','1');
-    showPanel();
-  } else {
-    const el = document.getElementById('login-toast');
-    el.className = 'toast error show';
-    el.innerHTML = '<span>❌</span><span>Password salah</span>';
-  }
-};
-
-window.doLogout = () => {
-  sessionStorage.removeItem('am_admin');
-  document.getElementById('admin-panel').style.display = 'none';
-  document.getElementById('login-screen').style.display= 'flex';
-  document.getElementById('login-pass').value = '';
-};
-
-function showPanel() {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('admin-panel').style.display  = 'block';
-  renderStats();
-  renderTable();
+async function doLogin(){
+ const pass=document.getElementById('lp').value.trim();if(!pass)return;
+ setLoad('lb','lsp',true);
+ try{const r=await api('/admin/login','POST',{password:pass});TOKEN=r.token;sessionStorage.setItem('am_adm',TOKEN);showPanel();}
+ catch(e){const el=document.getElementById('lt');el.className='toast error show';el.innerHTML=`<span>❌</span><span>${escapeHtml(e.message)}</span>`;}
+ finally{setLoad('lb','lsp',false);}
 }
-
-/* ── GENERATE ── */
-window.doGenerate = () => {
-  const count = parseInt(document.getElementById('gen-count').value, 10);
-  if (!Number.isFinite(count) || count < 1 || count > 500) {
-    return showToast('gen-toast','error','Jumlah harus antara 1–500');
-  }
-  setLoad('gen-btn','gen-sp',true);
-
-  // Small timeout so spinner renders
-  setTimeout(() => {
-    const { batch, batchId } = generateCodes(count);
-    lastBatch = batch;
-
-    document.getElementById('batch-count').textContent = batch.length;
-    document.getElementById('batch-banner').classList.add('show');
-    showToast('gen-toast','success',`${batch.length} kode berhasil dibuat`);
-    renderStats();
-    renderTable();
-    setLoad('gen-btn','gen-sp',false);
-  }, 50);
-};
-
-/* ── DOWNLOAD ZIP ── */
-window.doDownload = async () => {
-  if (!lastBatch.length) return;
-  setLoad('dl-btn','dl-sp',true);
-  try {
-    await buildAndDownloadZip(lastBatch, `kode-aktivasi-${Date.now()}.zip`);
-  } catch(e) {
-    showToast('gen-toast','error','ZIP gagal: ' + e.message);
-  } finally {
-    setLoad('dl-btn','dl-sp',false);
-  }
-};
-
-/* ── TABLE ── */
-function renderTable() {
-  const all    = listCodes(curFilter, curSearch);
-  const total  = all.length;
-  const pages  = Math.max(1, Math.ceil(total / PER_PAGE));
-  if (curPage > pages) curPage = pages;
-  const slice  = all.slice((curPage-1)*PER_PAGE, curPage*PER_PAGE);
-
-  const tbody  = document.getElementById('codes-tbody');
-  if (!slice.length) {
-    tbody.innerHTML = '<tr class="empty"><td colspan="8">Tidak ada kode</td></tr>';
-  } else {
-    tbody.innerHTML = slice.map((c, i) => {
-      const n = (curPage-1)*PER_PAGE + i + 1;
-      return `<tr>
-        <td style="color:var(--dim);font-size:11px">${n}</td>
-        <td class="code-cell">${c.code}</td>
-        <td><span class="badge b-${c.status}">${statusLabel(c.status)}</span></td>
-        <td class="dt">${fmt(c.created_at)}</td>
-        <td class="dt">${fmt(c.activated_at)}</td>
-        <td class="dt">${fmt(c.expires_at)}</td>
-        <td style="font-size:11.5px;color:var(--muted)">${c.used_by||'—'}</td>
-        <td>${c.status==='available'
-          ? `<button class="btn btn-danger" onclick="window.doRevoke('${c.id}',this)">Cabut</button>`
-          : '—'}</td>
-      </tr>`;
-    }).join('');
-  }
-
-  document.getElementById('pg-info').textContent   = `${total} kode · Hal ${curPage}/${pages}`;
-  document.getElementById('prev-btn').disabled = curPage <= 1;
-  document.getElementById('next-btn').disabled = curPage >= pages;
+function doLogout(){TOKEN='';sessionStorage.removeItem('am_adm');selectedCodes.clear();updateDeleteControls();document.getElementById('ap').style.display='none';document.getElementById('ls').style.display='flex';document.getElementById('lp').value='';}
+function showPanel(){document.getElementById('ls').style.display='none';document.getElementById('ap').style.display='block';loadStats();loadCodes();loadAudit();loadRecent();}
+function switchTab(name,btn){['codes','audit','recent'].forEach(t=>document.getElementById(`tab-${t}`).style.display=t===name?'block':'none');document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');if(name==='audit')loadAudit();if(name==='recent')loadRecent();}
+async function loadStats(){try{const r=await api('/admin/stats','GET');const s=r.stats||{};updateStats(s);}catch(_){}}
+function updateStats(s){document.getElementById('st').textContent=s.total||0;document.getElementById('sa').textContent=s.available||0;document.getElementById('su').textContent=s.used||0;document.getElementById('se').textContent=s.expired||0;document.getElementById('sr').textContent=s.revoked||0;document.getElementById('sd').textContent=s.activated_today||0;}
+async function doGen(){
+ const count=parseInt(document.getElementById('gc').value,10),duration_days=parseInt(document.getElementById('gd').value,10),note=document.getElementById('gn').value.trim()||null;
+ if(!Number.isFinite(count)||count<1||count>500)return showT('gt','error','Jumlah harus 1–500');
+ if(!Number.isFinite(duration_days)||duration_days<1)return showT('gt','error','Masa berlaku tidak valid');
+ setLoad('gb','gsp',true);hideT('gt');document.getElementById('bb').classList.remove('show');
+ try{const r=await api('/admin/generate','POST',{count,duration_days,note});lastBatch=r.batch_id;lastCount=r.count;document.getElementById('bc').textContent=r.count;document.getElementById('bid').textContent=String(r.batch_id||'').slice(0,8)+'…';document.getElementById('generatedCodes').value=Array.isArray(r.codes)?r.codes.join('\n'):'';document.getElementById('generated-result').style.display=Array.isArray(r.codes)&&r.codes.length?'block':'none';document.getElementById('bb').classList.add('show');curF='all';curS='';curPg=1;document.getElementById('si').value='';document.querySelectorAll('.fb').forEach(b=>b.classList.toggle('active',b.textContent.includes('Semua')));showT('gt','success',`${r.count} kode berhasil dibuat dengan masa berlaku ${duration_days} hari`);loadStats();loadCodes();}
+ catch(e){showT('gt','error',e.message);}finally{setLoad('gb','gsp',false);}
 }
-
-window.doRevoke = (id, btn) => {
-  if (!confirm('Cabut kode ini?')) return;
-  btn.disabled = true;
-  if (revokeCode(id)) { renderStats(); renderTable(); }
-  else { btn.disabled = false; alert('Gagal mencabut kode'); }
-};
-
-function renderStats() {
-  const s = getStats();
-  document.getElementById('s-total').textContent = s.total;
-  document.getElementById('s-avail').textContent = s.available;
-  document.getElementById('s-used').textContent  = s.used;
-  document.getElementById('s-dead').textContent  = s.expired + s.revoked;
+async function copyGeneratedCodes(){
+ const value=document.getElementById('generatedCodes').value;
+ if(!value)return showT('gt','error','Tidak ada kode untuk disalin');
+ try{await navigator.clipboard.writeText(value);showT('gt','success','Semua kode berhasil disalin');}
+ catch(_){const el=document.getElementById('generatedCodes');el.focus();el.select();try{const ok=document.execCommand('copy');showT('gt',ok?'success':'error',ok?'Semua kode berhasil disalin':'Gagal menyalin. Pilih teks lalu salin manual.');}catch(e){showT('gt','error','Gagal menyalin. Pilih teks lalu salin manual.');}}
 }
-
-/* ── FILTER / SEARCH / PAGE ── */
-window.setFilter = (btn, status) => {
-  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  curFilter = status; curPage = 1; renderTable();
-};
-window.debSearch = () => {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    curSearch = document.getElementById('search-input').value.trim();
-    curPage = 1; renderTable();
-  }, 350);
-};
-window.changePage = dir => {
-  curPage = Math.max(1, curPage + dir); renderTable();
-};
-window.renderTable = renderTable;
-
-/* ── UTILS ── */
-function setLoad(bid, sid, v) {
-  const b=document.getElementById(bid), s=document.getElementById(sid);
-  b.disabled=v; v?b.classList.add('loading'):b.classList.remove('loading');
+async function doDownload(){
+ if(!lastBatch)return;setLoad('db','dsp',true);
+ try{const resp=await fetch(`${API}/admin/download?batch_id=${encodeURIComponent(lastBatch)}`,{headers:{Authorization:`Bearer ${TOKEN}`}});
+ if(!resp.ok)throw new Error((await resp.text())||'Download gagal');
+ const blob=await resp.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`kode-aktivasi-${String(lastBatch).slice(0,8)}.txt`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showT('gt','success','File TXT berhasil diunduh');
+ }catch(e){showT('gt','error',e.message);}finally{setLoad('db','dsp',false);}
 }
-function showToast(id, type, msg) {
-  const el=document.getElementById(id);
-  el.className=`toast ${type} show`;
-  el.innerHTML=`<span>${type==='success'?'✅':'❌'}</span><span>${msg}</span>`;
+async function loadCodes(){
+ const qs=new URLSearchParams({page:curPg,limit:50,...(curF!=='all'&&{status:curF}),...(curS&&{search:curS})});
+ try{const r=await api(`/admin/codes?${qs}`,'GET');renderCodes(r.codes||[],r.total||0,r.page||1);}
+ catch(e){document.getElementById('ctb').innerHTML=`<tr class="empty"><td colspan="10">Error: ${escapeHtml(e.message)}</td></tr>`;}
 }
-function statusLabel(s) {
-  return {available:'● Tersedia',used:'● Terpakai',expired:'● Kadaluarsa',revoked:'● Dicabut'}[s]||s;
+function renderCodes(codes,total,page){
+ const tbody=document.getElementById('ctb'),PER=50,pages=Math.max(1,Math.ceil(total/PER));
+ if(!codes.length){tbody.innerHTML='<tr class="empty"><td colspan="10">Tidak ada kode</td></tr>';}
+ else{tbody.innerHTML=codes.map((c,i)=>{
+  const n=(page-1)*PER+i+1,statusCls={available:'ba',used:'bu',expired:'be',revoked:'br'}[c.status]||'',statusLbl={available:'● Tersedia',used:'● Terpakai',expired:'● Kadaluarsa',revoked:'● Dicabut'}[c.status]||c.status;
+  const id=String(c.id??''),isSelected=selectedCodes.has(id);
+  return `<tr><td>${c.status==='available'?`<input type="checkbox" class="code-check" value="${escapeHtml(id)}" ${isSelected?'checked':''} aria-label="Pilih kode ${escapeHtml(c.code)}" onchange="toggleCode(this.value,this.checked)">`:'—'}</td>
+  <td style="color:var(--dm);font-size:11px">${n}</td><td class="cc">${escapeHtml(c.code)}</td><td><span class="badge ${statusCls}">${escapeHtml(statusLbl)}</span></td>
+  <td style="font-size:11px;color:var(--mu)">${escapeHtml(c.note||'—')}</td><td class="dt">${fmt(c.created_at)}</td><td class="dt">${fmt(c.activated_at)}</td><td class="dt">${fmt(c.expires_at)}</td>
+  <td style="font-size:11.5px;color:var(--mu)">${escapeHtml(c.used_by_email||c.used_by||'—')}</td>
+  <td>${c.status==='available'?`<button class="btn bd-btn" onclick="doRevoke('${escapeHtml(id)}',this)">Cabut</button>`:'—'}</td></tr>`;
+ }).join('');}
+ document.getElementById('pgi').textContent=`${total} kode · Hal ${page}/${pages}`;document.getElementById('pb').disabled=page<=1;document.getElementById('nb').disabled=page>=pages;
+ const pageChecks=[...document.querySelectorAll('.code-check')];const allAvail=pageChecks.length>0&&pageChecks.every(el=>el.checked);const selectPage=document.getElementById('selectPage');selectPage.checked=allAvail;selectPage.indeterminate=pageChecks.some(el=>el.checked)&&!allAvail;
+ updateDeleteControls();
 }
-function fmt(d) {
-  if (!d) return '—';
-  const dt=new Date(d);
-  return dt.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'2-digit'})+
-    ' '+dt.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+function toggleCode(id,checked){if(checked)selectedCodes.add(id);else selectedCodes.delete(id);updateDeleteControls();syncPageCheckbox();}
+function togglePageCheckboxes(checked){document.querySelectorAll('.code-check').forEach(el=>{el.checked=checked;toggleCode(el.value,checked);});syncPageCheckbox();}
+function toggleSelectPage(){const checks=[...document.querySelectorAll('.code-check')];const allSelected=checks.length>0&&checks.every(el=>el.checked);togglePageCheckboxes(!allSelected);}
+function syncPageCheckbox(){const checks=[...document.querySelectorAll('.code-check')],box=document.getElementById('selectPage');if(!box)return;const selected=checks.filter(el=>el.checked).length;box.checked=checks.length>0&&selected===checks.length;box.indeterminate=selected>0&&selected<checks.length;}
+function updateDeleteControls(){const count=document.getElementById('selectedCount'),btn=document.getElementById('deleteSelectedBtn');if(count)count.textContent=selectedCodes.size;if(btn)btn.disabled=selectedCodes.size===0;}
+async function deleteSelected(){
+ const ids=[...selectedCodes];if(!ids.length)return alert('Pilih kode tersedia yang ingin dihapus.');
+ if(ids.length>500)return alert('Maksimal 500 kode per penghapusan. Hapus pilihan di beberapa tahap.');
+ if(!confirm(`Yakin ingin menghapus ${ids.length} kode aktivasi terpilih yang belum dipakai? Tindakan ini tidak dapat dibatalkan.`))return;
+ const btn=document.getElementById('deleteSelectedBtn');btn.disabled=true;
+ try{const result=await api('/admin/delete','POST',{ids});selectedCodes.clear();updateDeleteControls();await loadStats();await loadCodes();alert(`Permintaan selesai. ${result.deleted??0} kode berhasil dihapus.${(result.deleted??0)<ids.length?'\nSebagian kode mungkin sudah tidak tersedia atau tidak berstatus available.':''}`);}
+ catch(e){alert('Gagal menghapus kode: '+e.message);}finally{updateDeleteControls();}
 }
+async function doRevoke(id,btn){if(!confirm('Cabut kode ini? Tidak bisa dibatalkan.'))return;btn.disabled=true;try{await api('/admin/revoke','POST',{id});selectedCodes.delete(String(id));loadStats();loadCodes();}catch(e){alert('Gagal: '+e.message);btn.disabled=false;}}
+async function loadAudit(){const el=document.getElementById('audit-list');el.innerHTML='<div style="text-align:center;padding:20px;color:var(--dm)">Memuat audit log…</div>';try{const r=await api('/admin/stats','GET');if(r.errors&&r.errors.audit){el.innerHTML=`<div style="padding:14px;color:var(--er);font-size:12px">Gagal memuat Audit Log: ${escapeHtml(r.errors.audit)}<br>Periksa tabel <code>audit_log</code> di Supabase.</div>`;return;}const list=r.audit||[];if(!list.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--dm)">Belum ada aktivitas tercatat. Aktivitas baru akan muncul di sini.</div>';return;}const cls=a=>`ab-${String(a).replace(/[^a-z_]/g,'')}`;el.innerHTML=list.map(a=>{const meta=a.meta&&typeof a.meta==='object'?Object.entries(a.meta).map(([k,v])=>`${k}: ${typeof v==='object'?JSON.stringify(v):String(v)}`).join(' · '):'';return `<div class="audit-row" style="align-items:flex-start"><span class="audit-badge ${cls(a.action)}">${escapeHtml(a.action)}</span><div style="flex:1;min-width:0"><div class="audit-action">${escapeHtml(a.actor||'Admin')}</div>${meta?`<div style="font-size:11px;color:var(--mu);margin-top:3px;overflow-wrap:anywhere">${escapeHtml(meta)}</div>`:''}<div class="audit-actor" style="margin-top:3px">${a.ip_addr?'IP: '+escapeHtml(a.ip_addr):''}</div></div><span class="audit-time">${fmt(a.created_at)}</span></div>`;}).join('');}catch(e){el.innerHTML=`<div style="padding:14px;color:var(--er);font-size:12px">Gagal memuat Audit Log: ${escapeHtml(e.message)}</div>`;}}
+async function loadRecent(){const tbody=document.getElementById('rtb');tbody.innerHTML='<tr class="empty"><td colspan="4">Memuat aktivasi terbaru…</td></tr>';try{const r=await api('/admin/stats','GET');if(r.errors&&r.errors.recent){tbody.innerHTML=`<tr class="empty"><td colspan="4">Gagal memuat aktivasi: ${escapeHtml(r.errors.recent)}. Periksa kolom tabel activation_codes di Supabase.</td></tr>`;return;}const list=r.recent||[];if(!list.length){tbody.innerHTML='<tr class="empty"><td colspan="4">Belum ada kode berstatus Terpakai.</td></tr>';return;}tbody.innerHTML=list.map(c=>`<tr><td class="cc">${escapeHtml(c.code)}</td><td style="font-size:11.5px;color:var(--mu)">${escapeHtml(c.used_by_email||(c.used_by?'ID pengguna: '+c.used_by:'—'))}</td><td class="dt">${fmt(c.activated_at)}</td><td class="dt">${fmt(c.expires_at)}</td></tr>`).join('');}catch(e){tbody.innerHTML=`<tr class="empty"><td colspan="4">Gagal memuat aktivasi terbaru: ${escapeHtml(e.message)}</td></tr>`;}}
+function setF(btn,status){document.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));btn.classList.add('active');curF=status;curPg=1;loadCodes();}
+function debS(){clearTimeout(sTimer);sTimer=setTimeout(()=>{curS=document.getElementById('si').value.trim();curPg=1;loadCodes();},350);}
+function chPg(dir){curPg=Math.max(1,curPg+dir);loadCodes();}
+async function api(path,method='GET',body=null){const opts={method,headers:{'Content-Type':'application/json',...(TOKEN&&{Authorization:`Bearer ${TOKEN}`})}};if(body)opts.body=JSON.stringify(body);const r=await fetch(API+path,opts);const d=await r.json().catch(()=>({}));if(!r.ok){if(r.status===401){doLogout();throw new Error('Sesi berakhir. Login ulang.');}throw new Error(d.error||`HTTP ${r.status}`);}return d;}
+function setLoad(bid,sid,v){const b=document.getElementById(bid),s=document.getElementById(sid);if(!b||!s)return;b.disabled=v;v?b.classList.add('loading'):b.classList.remove('loading');}
+function showT(id,type,msg){const el=document.getElementById(id);el.className=`toast ${type} show`;el.innerHTML=`<span>${type==='success'?'✅':'❌'}</span><span>${escapeHtml(msg)}</span>`;}
+function hideT(id){document.getElementById(id).className='toast';}
+function fmt(d){if(!d)return'—';const dt=new Date(d);if(Number.isNaN(dt.getTime()))return'—';return dt.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'2-digit'})+' '+dt.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});}
+function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
 </script>
 </body>
 </html>
