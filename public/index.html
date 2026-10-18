@@ -112,7 +112,7 @@
         <div class="cara-content"><h3>Daftar Akun</h3><p>Buat akun dengan email dan password, lalu verifikasi email kamu.</p></div>
       </div>
       <div class="cara-item"><div class="cara-num">2</div>
-        <div class="cara-content"><h3>Dapatkan Kode</h3><p>Hubungi admin via WhatsApp atau TikTok untuk membeli kode aktivasi.</p></div>
+        <div class="cara-content"><h3>Dapatkan Kode</h3><p>Beli kode aktivasi langsung lewat QRIS di halaman ini.</p></div>
       </div>
       <div class="cara-item"><div class="cara-num">3</div>
         <div class="cara-content"><h3>Aktivasi & Pakai</h3><p>Masukkan kode aktivasi, premium aktif 30 hari.</p></div>
@@ -142,6 +142,35 @@
 
     <!-- ACTIVATE CODE SECTION (shown if no premium) -->
     <div id="activate-section">
+      <div class="card" id="buy-code-card" style="margin-bottom:16px">
+        <div style="font-size:15px;font-weight:800;margin-bottom:6px">🛒 Beli Kode Aktivasi</div>
+        <p class="hint" style="margin-bottom:14px">Bayar lewat QRIS Pakasir. Kode hanya diterbitkan setelah pembayaran terkonfirmasi.</p>
+        <div class="field">
+          <label class="field-label" for="buy-count">JUMLAH KODE (1–10)</label>
+          <input type="number" id="buy-count" class="no-icon" value="1" min="1" max="10" step="1"
+            oninput="updateBuyTotal()">
+          <p class="hint" id="buy-total">Total: Rp20.000</p>
+        </div>
+        <button class="btn btn-primary" id="buy-btn" onclick="buyCodes()">
+          <div class="spin" id="buy-sp"></div><span class="btn-text">Bayar dengan QRIS →</span>
+        </button>
+        <div class="toast" id="buy-toast"><span class="toast-icon"></span><span class="toast-msg"></span></div>
+
+        <div id="payment-pending" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+          <p style="font-weight:700;margin-bottom:6px">Menunggu pembayaran</p>
+          <p class="hint" id="payment-order-info" style="margin-bottom:12px"></p>
+          <a id="payment-link" class="btn btn-primary" href="#" target="_blank" rel="noopener noreferrer"
+            style="text-decoration:none;margin-bottom:10px">Buka Halaman Pembayaran ↗</a>
+          <button class="btn btn-ghost" id="check-payment-btn" onclick="checkPaymentStatus()">Saya sudah membayar — Cek Status</button>
+          <div class="toast" id="payment-status-toast"><span class="toast-icon"></span><span class="toast-msg"></span></div>
+        </div>
+
+        <div id="payment-result" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+          <p style="font-weight:800;color:var(--ok);margin-bottom:8px">✅ Pembayaran berhasil! Ini kode aktivasimu:</p>
+          <p class="hint" style="margin-bottom:10px">Salin dan simpan kode. Setiap kode hanya bisa dipakai satu kali.</p>
+          <div id="payment-codes" style="display:grid;gap:8px"></div>
+        </div>
+      </div>
       <div class="card" style="margin-bottom:16px">
         <div style="font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px">
           🔑 Aktivasi Premium
