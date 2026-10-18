@@ -1,5 +1,21 @@
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    { "src": "/api/admin/login",    "dest": "/api/admin.js" },
+    { "src": "/api/admin/stats",    "dest": "/api/admin.js" },
+    { "src": "/api/admin/codes",    "dest": "/api/admin.js" },
+    { "src": "/api/admin/generate", "dest": "/api/admin.js" },
+    { "src": "/api/admin/revoke",   "dest": "/api/admin.js" },
+    { "src": "/api/admin/delete",   "dest": "/api/admin.js" },
+    { "src": "/api/admin/download", "dest": "/api/admin.js" },
+    { "src": "/api/auth",           "dest": "/api/auth.js"  },
+    { "src": "/api/(.*)",           "dest": "/api/$1.js"    },
+    { "src": "/(.*)",               "dest": "/$1"           }
   ]
 }
