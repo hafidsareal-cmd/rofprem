@@ -95,7 +95,7 @@
           <label class="field-label">KODE VERIFIKASI</label>
           <div class="input-wrap"><span class="input-icon">🔐</span>
             <input type="text" id="v-code" placeholder="123456" inputmode="numeric" maxlength="6" autocomplete="one-time-code"
-              oninput="this.value=this.value.replace(/\\D/g,'').slice(0,6)" onkeydown="if(event.key==='Enter')doVerifyCode()">
+              oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)" onkeydown="if(event.key==='Enter')doVerifyCode()">
           </div>
           <p class="hint">Kode berlaku 30 menit. Cek inbox atau folder spam.</p>
         </div>
