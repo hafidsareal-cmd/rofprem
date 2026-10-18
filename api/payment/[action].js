@@ -3,7 +3,7 @@ import { supabase } from '../../lib/db.js';
 import { requireUser } from '../../lib/auth.js';
 import { generateCode } from '../../lib/codes.js';
 
-const PRICE_PER_CODE = 1000;
+const PRICE_PER_CODE = 20000;
 const MAX_CODES_PER_ORDER = 10;
 
 async function createPayment(req, res) {
