@@ -119,9 +119,9 @@ window.doRegister = async () => {
 window.doVerifyCode = async () => {
   const email = document.getElementById('v-email').value.trim();
   const code = document.getElementById('v-code').value.trim();
-  if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email))
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
     return toast('v-toast','error','⚠️','Masukkan email yang valid');
-  if (!/^\\d{6}$/.test(code))
+  if (!/^\d{6}$/.test(code))
     return toast('v-toast','error','⚠️','Kode harus terdiri dari 6 angka');
 
   setLoad('v-btn','v-sp',true); clearToast('v-toast');
