@@ -459,3 +459,58 @@ async function authPost(url,body,token) {
   if(!r.ok) throw new Error(d.error||`HTTP ${r.status}`);
   return d;
 }
+
+
+/* ── Pakasir activation-code purchase ── */
+let pakasirOrderId = '';
+window.buyActivationCode = async () => {
+  const btn = document.getElementById('buy-code-btn');
+  const panel = document.getElementById('purchase-payment');
+  const result = document.getElementById('purchase-result');
+  btn.disabled = true; btn.textContent = 'Membuat pembayaran...';
+  result.style.display = 'none';
+  try {
+    const d = await post('/api/payments/create', {});
+    pakasirOrderId = d.order_id;
+    document.getElementById('purchase-order').textContent = 'Pesanan: ' + d.order_id;
+    document.getElementById('purchase-total').textContent = 'Total: Rp' + Number(d.total_payment || 20000).toLocaleString('id-ID');
+    const qr = document.getElementById('purchase-qr');
+    qr.innerHTML = '';
+    if (!window.QRCode) throw new Error('QR generator belum siap. Muat ulang halaman dan coba lagi.');
+    new QRCode(qr, { text: d.qr_string, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M });
+    panel.style.display = 'block';
+    btn.textContent = 'Buat ulang pembayaran';
+  } catch (e) {
+    result.className = 'toast error show'; result.textContent = e.message; result.style.display = 'block';
+    btn.textContent = 'Coba buat pembayaran lagi';
+  } finally { btn.disabled = false; }
+};
+window.checkActivationPayment = async () => {
+  if (!pakasirOrderId) return;
+  const btn = document.getElementById('check-payment-btn');
+  const result = document.getElementById('purchase-result');
+  btn.disabled = true; btn.textContent = 'Memeriksa pembayaran...';
+  try {
+    const r = await fetch('/api/payments/status?order_id=' + encodeURIComponent(pakasirOrderId), {cache:'no-store'});
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || 'Gagal memeriksa pembayaran.');
+    if (d.status === 'paid' && d.code) {
+      result.className = 'toast success show';
+      result.textContent = 'Pembayaran berhasil! Kode aktivasi kamu: ' + d.code + ' — simpan kode ini sekarang.';
+      result.style.display = 'block';
+      btn.textContent = 'Pembayaran berhasil'; btn.disabled = true;
+      const codeLine = document.createElement('div');
+      codeLine.style.cssText = 'font-family:monospace;font-size:18px;font-weight:800;margin-top:10px;word-break:break-word';
+      codeLine.textContent = d.code; result.appendChild(codeLine);
+      const copy = document.createElement('button');
+      copy.className = 'btn btn-primary'; copy.style.marginTop = '10px'; copy.textContent = 'Salin kode';
+      copy.onclick = async () => { try { await navigator.clipboard.writeText(d.code); copy.textContent = 'Tersalin'; } catch (_) { copy.textContent = d.code; } };
+      result.appendChild(copy);
+    } else {
+      result.className = 'toast show'; result.textContent = d.status === 'expired' ? 'Tagihan sudah kedaluwarsa. Buat pembayaran baru.' : 'Pembayaran belum terkonfirmasi. Jika sudah membayar, tunggu sebentar lalu periksa lagi.';
+      result.style.display = 'block';
+    }
+  } catch(e) {
+    result.className = 'toast error show'; result.textContent = e.message; result.style.display = 'block';
+  } finally { if (btn.textContent !== 'Pembayaran berhasil') { btn.disabled = false; btn.textContent = 'Saya sudah membayar — periksa status'; } }
+};
