@@ -202,7 +202,7 @@ window.doActivate = async () => {
 /* ─────────────────────────────────────────
    BUY ACTIVATION CODES — PAKASIR QRIS
 ───────────────────────────────────────── */
-const BUY_CODE_PRICE = 20000;
+const BUY_CODE_PRICE = 1000;
 const PENDING_ORDER_KEY = 'rofprem_pending_order';
 
 window.updateBuyTotal = () => {
