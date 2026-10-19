@@ -4,6 +4,21 @@
     {
       "src": "api/*.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "*.css",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "*.js",
+      "use": "@vercel/static",
+      "config": {
+        "exclude": ["api/**"]
+      }
     }
   ],
   "routes": [
@@ -15,7 +30,8 @@
     { "src": "/api/admin/delete",   "dest": "/api/admin.js" },
     { "src": "/api/admin/download", "dest": "/api/admin.js" },
     { "src": "/api/auth",           "dest": "/api/auth.js"  },
-    { "src": "/api/(.*)",           "dest": "/api/$1.js"    },
+    { "src": "/admin",              "dest": "/admin.html"   },
+    { "src": "/",                   "dest": "/index.html"   },
     { "src": "/(.*)",               "dest": "/$1"           }
   ]
 }
